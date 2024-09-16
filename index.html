@@ -10,9 +10,10 @@
         .status-local { color: green; }
         .status-not-found { color: red; }
         #program-table { margin-bottom: 20px; }
-        #add-program-form { margin-bottom: 20px; }
-        .delete-program { color: red; cursor: pointer; }
         .edit-select { width: 100%; }
+        .add-program, .delete-program { cursor: pointer; }
+        .add-program { color: green; }
+        .delete-program { color: red; }
     </style>
 </head>
 <body>
@@ -39,18 +40,7 @@
         </tbody>
     </table>
 
-    <form id="add-program-form">
-        <input type="time" id="new-time" required>
-        <input type="text" id="new-program" placeholder="プログラム名" required>
-        <select id="new-audio-source" required>
-            <option value="--">--</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-        </select>
-        <input type="number" id="new-track-number" min="1" max="99" required>
-        <button type="submit">プログラムを追加</button>
-    </form>
+    <p>新しい行を追加するには、「＋」ボタンをクリックしてください。</p>
 
     <div id="audio-path-info">
         <h3>音源ファイルの命名規則：</h3>

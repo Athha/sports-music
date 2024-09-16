@@ -8,37 +8,51 @@
     <link rel="manifest" href="manifest.json">
     <style>
         .status-local { color: green; }
-        .status-sample { color: orange; }
         .status-not-found { color: red; }
-        #loading-message { display: none; }
-        #audio-path-info {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
+        #program-table { margin-bottom: 20px; }
+        #add-program-form { margin-bottom: 20px; }
+        .delete-program { color: red; cursor: pointer; }
     </style>
 </head>
 <body>
     <h1>運動会プログラム</h1>
     
-    <div id="loading-message">音源ファイルをチェック中...</div>
+    <input type="file" id="audio-file-input" multiple accept="audio/*" style="display: none;">
+    <button id="select-audio-files">音源ファイルを選択</button>
     
     <table id="program-table">
-        <tr>
-            <th>時間</th>
-            <th>プログラム</th>
-            <th>音源区分</th>
-            <th>状態</th>
-            <th>音楽</th>
-        </tr>
-        <!-- プログラムの内容はJavaScriptで動的に追加されます -->
+        <thead>
+            <tr>
+                <th>時間</th>
+                <th>プログラム</th>
+                <th>音源区分</th>
+                <th>トラック番号</th>
+                <th>状態</th>
+                <th>音楽</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- プログラムの内容はJavaScriptで動的に追加されます -->
+        </tbody>
     </table>
 
+    <form id="add-program-form">
+        <input type="time" id="new-time" required>
+        <input type="text" id="new-program" placeholder="プログラム名" required>
+        <select id="new-audio-source" required>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+        </select>
+        <input type="number" id="new-track-number" min="1" max="99" required>
+        <button type="submit">プログラムを追加</button>
+    </form>
+
     <div id="audio-path-info">
-        <h3>音源ファイルの保存場所：</h3>
-        <p id="audio-full-path"></p>
+        <h3>音源ファイルの命名規則：</h3>
+        <p>音源区分(a/b/c) + 2桁のトラック番号 + .mp3</p>
+        <p>例: a01.mp3, b15.mp3, c07.mp3</p>
     </div>
 
     <script src="script.js"></script>

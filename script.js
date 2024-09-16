@@ -1,150 +1,103 @@
-// プログラムデータ
-const programData = [
-    { time: "9:00", program: "開会式", audioSource: "A", trackNumber: "01" },
-    { time: "9:30", program: "100m走", audioSource: "B", trackNumber: "03" },
+let programData = [
+    { time: "09:00", program: "開会式", audioSource: "A", trackNumber: "01" },
+    { time: "09:30", program: "100m走", audioSource: "B", trackNumber: "03" },
     { time: "10:00", program: "玉入れ", audioSource: "C", trackNumber: "07" },
-    { time: "10:30", program: "障害物競走", audioSource: "A", trackNumber: "12" },
-    { time: "11:00", program: "リレー", audioSource: "B", trackNumber: "15" },
-    { time: "11:30", program: "閉会式", audioSource: "C", trackNumber: "19" }
 ];
 
-let currentAudio = null;
-let audioStatus = {};
+let audioFiles = {};
 
-// 音楽再生機能
-async function playMusic(audioSource, trackNumber) {
-    const localPath = `audio/${audioSource.toLowerCase()}/${trackNumber}.mp3`;
-    const samplePath = 'audio/sample.mp3';
+document.addEventListener('DOMContentLoaded', () => {
+    renderProgramTable();
+    setupEventListeners();
+});
 
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-    }
+function setupEventListeners() {
+    document.getElementById('select-audio-files').addEventListener('click', () => {
+        document.getElementById('audio-file-input').click();
+    });
 
-    try {
-        if (audioStatus[`${audioSource}-${trackNumber}`] === 'local') {
-            currentAudio = new Audio(localPath);
-            await currentAudio.play();
-            console.log(`ローカルファイルを再生中: ${localPath}`);
-        } else {
-            currentAudio = new Audio(samplePath);
-            await currentAudio.play();
-            console.log('サンプルファイルを再生中');
+    document.getElementById('audio-file-input').addEventListener('change', handleFileSelect);
+
+    document.getElementById('add-program-form').addEventListener('submit', handleAddProgram);
+}
+
+function handleFileSelect(event) {
+    const files = event.target.files;
+    for (let file of files) {
+        const match = file.name.match(/^([abc])(\d{2})\.mp3$/i);
+        if (match) {
+            const [, source, number] = match;
+            audioFiles[`${source.toUpperCase()}-${number}`] = file;
         }
-    } catch (error) {
-        console.error('音楽の再生に失敗しました:', error);
-        alert(`音楽の再生に失敗しました。ファイルが見つからないか、ブラウザがサポートしていない可能性があります。`);
     }
+    renderProgramTable();
 }
 
-// ファイルの存在を確認する関数
-async function checkFileExists(url) {
-    try {
-        const response = await fetch(url, { method: 'HEAD' });
-        return response.ok;
-    } catch (error) {
-        console.warn(`ファイルの確認中にエラーが発生しました: ${url}`, error);
-        return false;
-    }
-}
-
-// テーブル生成関数
-function generateTable() {
-    const table = document.getElementById('program-table');
+function renderProgramTable() {
+    const tableBody = document.querySelector('#program-table tbody');
+    tableBody.innerHTML = '';
     
+    programData.forEach((item, index) => {
+        const row = tableBody.insertRow();
+        row.innerHTML = `
+            <td>${item.time}</td>
+            <td>${item.program}</td>
+            <td>${item.audioSource}</td>
+            <td>${item.trackNumber}</td>
+            <td id="status-${item.audioSource}-${item.trackNumber}"></td>
+            <td><button onclick="playMusic('${item.audioSource}', '${item.trackNumber}')">▶ 再生</button></td>
+            <td><span class="delete-program" onclick="deleteProgram(${index})">✖</span></td>
+        `;
+    });
+    
+    updateAudioStatus();
+}
+
+function updateAudioStatus() {
     programData.forEach(item => {
-        const row = table.insertRow();
-        row.insertCell(0).textContent = item.time;
-        row.insertCell(1).textContent = item.program;
-        row.insertCell(2).textContent = item.audioSource;
-        const statusCell = row.insertCell(3);
-        statusCell.id = `status-${item.audioSource}-${item.trackNumber}`;
-        statusCell.textContent = '確認中...';
-        const musicCell = row.insertCell(4);
-        const button = document.createElement('button');
-        button.textContent = "▶ 再生";
-        button.onclick = () => playMusic(item.audioSource, item.trackNumber);
-        musicCell.appendChild(button);
+        const key = `${item.audioSource}-${item.trackNumber}`;
+        const statusElement = document.getElementById(`status-${key}`);
+        if (statusElement) {
+            if (audioFiles[key]) {
+                statusElement.textContent = 'ローカル';
+                statusElement.className = 'status-local';
+            } else {
+                statusElement.textContent = '未検出';
+                statusElement.className = 'status-not-found';
+            }
+        }
     });
 }
 
-// 全てのファイルの存在をチェックし、状態を更新
-async function checkAllFiles() {
-    document.getElementById('loading-message').style.display = 'block';
+function playMusic(audioSource, trackNumber) {
+    const key = `${audioSource}-${trackNumber}`;
+    const audioFile = audioFiles[key];
 
-    for (const item of programData) {
-        const key = `${item.audioSource}-${item.trackNumber}`;
-        const path = `audio/${item.audioSource.toLowerCase()}/${item.trackNumber}.mp3`;
-        const exists = await checkFileExists(path);
-
-        alert(path);
-        
-        if (exists) {
-            audioStatus[key] = 'local';
-            updateStatus(key, 'ローカル', 'status-local');
-        } else {
-            const sampleExists = await checkFileExists('audio/sample.mp3');
-            if (sampleExists) {
-                audioStatus[key] = 'sample';
-                updateStatus(key, 'サンプル', 'status-sample');
-            } else {
-                audioStatus[key] = 'not-found';
-                updateStatus(key, '未検出', 'status-not-found');
-            }
-        }
-    }
-
-    document.getElementById('loading-message').style.display = 'none';
-}
-
-// 状態表示を更新
-function updateStatus(key, text, className) {
-    const statusElement = document.getElementById(`status-${key}`);
-    if (statusElement) {
-        statusElement.textContent = text;
-        statusElement.className = className;
+    if (audioFile) {
+        const audio = new Audio(URL.createObjectURL(audioFile));
+        audio.play();
+    } else {
+        alert('音源ファイルが見つかりません。ファイルを選択してください。');
     }
 }
 
-
-// フルパスを計算して表示する関数
-function displayLocalAudioPath() {
-    const pathInfo = document.getElementById('audio-full-path');
-    
-    // OSに応じたパス例を生成
-    const windowsPath = 'C:\\Users\\YourUsername\\Documents\\運動会\\audio\\';
-    const macLinuxPath = '/Users/YourUsername/Documents/運動会/audio/';
-
-    pathInfo.innerHTML = `
-        <p>音源ファイルは、あなたのコンピューター上の適切な場所に保存してください。以下は推奨されるパスの例です：</p>
-        
-        <strong>Windowsの場合:</strong><br>
-        ${windowsPath}<br>
-        <br>
-        <strong>MacまたはLinuxの場合:</strong><br>
-        ${macLinuxPath}<br>
-        <br>
-        <strong>ディレクトリ構造:</strong><br>
-        audio/<br>
-        ├── a/<br>
-        │   ├── 01.mp3<br>
-        │   ├── 02.mp3<br>
-        │   └── ...<br>
-        ├── b/<br>
-        │   ├── 01.mp3<br>
-        │   ├── 02.mp3<br>
-        │   └── ...<br>
-        ├── c/<br>
-        │   ├── 01.mp3<br>
-        │   ├── 02.mp3<br>
-        │   └── ...<br>
-        └── sample.mp3
-    `;
+function handleAddProgram(event) {
+    event.preventDefault();
+    const newProgram = {
+        time: document.getElementById('new-time').value,
+        program: document.getElementById('new-program').value,
+        audioSource: document.getElementById('new-audio-source').value,
+        trackNumber: document.getElementById('new-track-number').value.padStart(2, '0')
+    };
+    programData.push(newProgram);
+    programData.sort((a, b) => a.time.localeCompare(b.time));
+    renderProgramTable();
+    event.target.reset();
 }
 
-// DOMが読み込まれた後に実行する既存のコードを更新
-document.addEventListener('DOMContentLoaded', () => {
-    generateTable();
-    checkAllFiles();
-    displayLocalAudioPath();  // この行を変更
-});
+function deleteProgram(index) {
+    if (confirm('このプログラムを削除してもよろしいですか？')) {
+        programData.splice(index, 1);
+        renderProgramTable();
+    }
+}

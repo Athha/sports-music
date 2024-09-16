@@ -1,13 +1,9 @@
-let programData = [
-    { time: "09:00", program: "開会式", audioSource: "A", trackNumber: "01" },
-    { time: "09:30", program: "100m走", audioSource: "B", trackNumber: "03" },
-    { time: "10:00", program: "玉入れ", audioSource: "--", trackNumber: "07" },
-];
-
+let programData = [];
 let audioFiles = {};
 let currentAudio = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+    loadFromLocalStorage();
     renderProgramTable();
     setupEventListeners();
 });
@@ -35,6 +31,7 @@ function handleFileSelect(event) {
         }
     }
     renderProgramTable();
+    saveToLocalStorage();
 }
 
 function renderProgramTable() {
@@ -116,6 +113,7 @@ function handleAddProgram(event) {
     programData.push(newProgram);
     programData.sort((a, b) => a.time.localeCompare(b.time));
     renderProgramTable();
+    saveToLocalStorage();
     event.target.reset();
 }
 
@@ -123,17 +121,20 @@ function deleteProgram(index) {
     if (confirm('このプログラムを削除してもよろしいですか？')) {
         programData.splice(index, 1);
         renderProgramTable();
+        saveToLocalStorage();
     }
 }
 
 function updateAudioSource(index, value) {
     programData[index].audioSource = value;
     renderProgramTable();
+    saveToLocalStorage();
 }
 
 function updateTrackNumber(index, value) {
     programData[index].trackNumber = value.padStart(2, '0');
     renderProgramTable();
+    saveToLocalStorage();
 }
 
 function checkAllFiles() {
@@ -149,5 +150,36 @@ function checkAllFiles() {
         alert('以下のファイルが見つかりません:\n' + missingFiles.join('\n'));
     } else {
         alert('全ての音源ファイルが見つかりました。');
+    }
+}
+
+// ローカルストレージにデータを保存する関数
+function saveToLocalStorage() {
+    localStorage.setItem('programData', JSON.stringify(programData));
+    
+    // audioFilesオブジェクトの保存
+    const audioFileNames = Object.keys(audioFiles).reduce((acc, key) => {
+        acc[key] = audioFiles[key].name;
+        return acc;
+    }, {});
+    localStorage.setItem('audioFileNames', JSON.stringify(audioFileNames));
+}
+
+// ローカルストレージからデータを読み込む関数
+function loadFromLocalStorage() {
+    const savedProgramData = localStorage.getItem('programData');
+    if (savedProgramData) {
+        programData = JSON.parse(savedProgramData);
+    }
+
+    const savedAudioFileNames = localStorage.getItem('audioFileNames');
+    if (savedAudioFileNames) {
+        const fileNames = JSON.parse(savedAudioFileNames);
+        // ここでは実際のFileオブジェクトは復元できないため、
+        // 名前だけを保持したダミーオブジェクトを作成します
+        audioFiles = Object.keys(fileNames).reduce((acc, key) => {
+            acc[key] = { name: fileNames[key] };
+            return acc;
+        }, {});
     }
 }

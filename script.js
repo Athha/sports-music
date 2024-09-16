@@ -104,8 +104,37 @@ function updateStatus(key, text, className) {
     }
 }
 
-// DOMが読み込まれた後に実行
+// フルパスを計算して表示する関数
+function displayFullPath() {
+    const currentPath = window.location.pathname;
+    const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+    const fullPath = `${window.location.origin}${basePath}audio/`;
+
+    const pathInfo = document.getElementById('audio-full-path');
+    pathInfo.innerHTML = `
+        <strong>フルパス:</strong> ${fullPath}<br><br>
+        <strong>ディレクトリ構造:</strong><br>
+        ${fullPath}<br>
+        ├── a/<br>
+        │   ├── 01.mp3<br>
+        │   ├── 02.mp3<br>
+        │   └── ...<br>
+        ├── b/<br>
+        │   ├── 01.mp3<br>
+        │   ├── 02.mp3<br>
+        │   └── ...<br>
+        ├── c/<br>
+        │   ├── 01.mp3<br>
+        │   ├── 02.mp3<br>
+        │   └── ...<br>
+        └── sample.mp3
+    `;
+}
+
+// DOMが読み込まれた後に実行する既存のコードを更新
 document.addEventListener('DOMContentLoaded', () => {
     generateTable();
     checkAllFiles();
+    displayFullPath();  // この行を追加
 });
+

@@ -11,6 +11,13 @@
         .status-sample { color: orange; }
         .status-not-found { color: red; }
         #loading-message { display: none; }
+        #audio-path-info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
@@ -28,6 +35,11 @@
         </tr>
         <!-- プログラムの内容はJavaScriptで動的に追加されます -->
     </table>
+
+    <div id="audio-path-info">
+        <h3>音源ファイルの保存場所：</h3>
+        <p id="audio-full-path"></p>
+    </div>
 
     <script src="script.js"></script>
 </body>

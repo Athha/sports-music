@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>運動会プログラム</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>運動会プログラム</h1>
+    <table id="program-table">
+        <tr>
+            <th>時間</th>
+            <th>プログラム</th>
+            <th>音楽</th>
+        </tr>
+        <!-- プログラムの内容はJavaScriptで動的に追加します -->
+    </table>
+
+    <script>
+        // サービスワーカーの登録
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
+        }
+
+        // プログラムデータ（実際のデータに置き換えてください）
+        const programData = [
+            { time: "9:00", program: "開会式", music: "fanfare.mp3" },
+            { time: "9:30", program: "100m走", music: "run.mp3" },
+            // 他のプログラムを追加...
+        ];
+
+        // テーブルにデータを追加
+        const table = document.getElementById('program-table');
+        programData.forEach(item => {
+            const row = table.insertRow();
+            row.insertCell(0).textContent = item.time;
+            row.insertCell(1).textContent = item.program;
+            const musicCell = row.insertCell(2);
+            const button = document.createElement('button');
+            button.textContent = "再生";
+            button.onclick = () => playMusic(item.music);
+            musicCell.appendChild(button);
+        });
+
+        // 音楽再生関数
+        function playMusic(filename) {
+            const audio = new Audio(filename);
+            audio.play();
+        }
+    </script>
+</body>
+</html>

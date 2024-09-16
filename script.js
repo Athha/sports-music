@@ -1,11 +1,11 @@
 // プログラムデータ
 const programData = [
-    { time: "9:00", program: "開会式", music: "fanfare.mp3" },
-    { time: "9:30", program: "100m走", music: "run.mp3" },
-    { time: "10:00", program: "玉入れ", music: "teamwork.mp3" },
-    { time: "10:30", program: "障害物競走", music: "obstacle.mp3" },
-    { time: "11:00", program: "リレー", music: "relay.mp3" },
-    { time: "11:30", program: "閉会式", music: "closing.mp3" }
+    { time: "9:00", program: "開会式", music: "sample.mp3" },
+    { time: "9:30", program: "100m走", music: "sample.mp3" },
+    { time: "10:00", program: "玉入れ", music: "sample.mp3" },
+    { time: "10:30", program: "障害物競走", music: "sample.mp3" },
+    { time: "11:00", program: "リレー", music: "sample.mp3" },
+    { time: "11:30", program: "閉会式", music: "sample.mp3" }
 ];
 
 // DOMが読み込まれた後に実行
@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
         button.onclick = () => playMusic(item.music);
         musicCell.appendChild(button);
     });
+
+    // テスト用の再生ボタンを追加
+    const testButton = document.createElement('button');
+    testButton.textContent = "サンプル音楽をテスト";
+    testButton.onclick = () => playMusic('sample.mp3');
+    document.body.insertBefore(testButton, table);
 
     // Service Workerの登録
     if ('serviceWorker' in navigator) {
@@ -44,7 +50,7 @@ function playMusic(filename) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
     }
-    currentAudio = new Audio(filename);
+    currentAudio = new Audio(`audio/${filename}`);
     currentAudio.play()
         .catch(error => {
             console.error('音楽の再生に失敗しました:', error);

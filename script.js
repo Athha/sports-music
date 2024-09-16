@@ -9,6 +9,7 @@ const programData = [
 ];
 
 let currentAudio = null;
+let audioStatus = {};
 
 // 音楽再生機能
 async function playMusic(audioSource, trackNumber) {
@@ -21,24 +22,18 @@ async function playMusic(audioSource, trackNumber) {
     }
 
     try {
-        // まずローカルファイルの存在を確認
-        if (await checkFileExists(localPath)) {
+        if (audioStatus[`${audioSource}-${trackNumber}`] === 'local') {
             currentAudio = new Audio(localPath);
             await currentAudio.play();
             console.log(`ローカルファイルを再生中: ${localPath}`);
         } else {
-            // ローカルファイルが見つからない場合、サンプルファイルを使用
-            if (await checkFileExists(samplePath)) {
-                currentAudio = new Audio(samplePath);
-                await currentAudio.play();
-                console.log('サンプルファイルを再生中');
-            } else {
-                throw new Error('サンプルファイルも見つかりません');
-            }
+            currentAudio = new Audio(samplePath);
+            await currentAudio.play();
+            console.log('サンプルファイルを再生中');
         }
     } catch (error) {
         console.error('音楽の再生に失敗しました:', error);
-        alert(`音楽の再生に失敗しました。ローカルファイル (${localPath}) とサンプルファイルが見つからないか、ブラウザがサポートしていない可能性があります。`);
+        alert(`音楽の再生に失敗しました。ファイルが見つからないか、ブラウザがサポートしていない可能性があります。`);
     }
 }
 
@@ -62,7 +57,10 @@ function generateTable() {
         row.insertCell(0).textContent = item.time;
         row.insertCell(1).textContent = item.program;
         row.insertCell(2).textContent = item.audioSource;
-        const musicCell = row.insertCell(3);
+        const statusCell = row.insertCell(3);
+        statusCell.id = `status-${item.audioSource}-${item.trackNumber}`;
+        statusCell.textContent = '確認中...';
+        const musicCell = row.insertCell(4);
         const button = document.createElement('button');
         button.textContent = "▶ 再生";
         button.onclick = () => playMusic(item.audioSource, item.trackNumber);
@@ -70,14 +68,40 @@ function generateTable() {
     });
 }
 
-// ページロード時に全てのファイルの存在をチェック
+// 全てのファイルの存在をチェックし、状態を更新
 async function checkAllFiles() {
+    document.getElementById('loading-message').style.display = 'block';
+
     for (const item of programData) {
+        const key = `${item.audioSource}-${item.trackNumber}`;
         const path = `audio/${item.audioSource.toLowerCase()}/${item.trackNumber}.mp3`;
         const exists = await checkFileExists(path);
-        console.log(`ファイル ${path} の存在: ${exists ? "あり" : "なし"}`);
+        
+        if (exists) {
+            audioStatus[key] = 'local';
+            updateStatus(key, 'ローカル', 'status-local');
+        } else {
+            const sampleExists = await checkFileExists('audio/sample.mp3');
+            if (sampleExists) {
+                audioStatus[key] = 'sample';
+                updateStatus(key, 'サンプル', 'status-sample');
+            } else {
+                audioStatus[key] = 'not-found';
+                updateStatus(key, '未検出', 'status-not-found');
+            }
+        }
     }
-    console.log('サンプルファイルの存在:', await checkFileExists('audio/sample.mp3'));
+
+    document.getElementById('loading-message').style.display = 'none';
+}
+
+// 状態表示を更新
+function updateStatus(key, text, className) {
+    const statusElement = document.getElementById(`status-${key}`);
+    if (statusElement) {
+        statusElement.textContent = text;
+        statusElement.className = className;
+    }
 }
 
 // DOMが読み込まれた後に実行

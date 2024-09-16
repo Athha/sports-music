@@ -6,15 +6,24 @@
     <title>運動会プログラム</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
+    <style>
+        .status-local { color: green; }
+        .status-sample { color: orange; }
+        .status-not-found { color: red; }
+        #loading-message { display: none; }
+    </style>
 </head>
 <body>
     <h1>運動会プログラム</h1>
+    
+    <div id="loading-message">音源ファイルをチェック中...</div>
     
     <table id="program-table">
         <tr>
             <th>時間</th>
             <th>プログラム</th>
             <th>音源区分</th>
+            <th>状態</th>
             <th>音楽</th>
         </tr>
         <!-- プログラムの内容はJavaScriptで動的に追加されます -->

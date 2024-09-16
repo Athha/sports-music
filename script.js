@@ -76,6 +76,8 @@ async function checkAllFiles() {
         const key = `${item.audioSource}-${item.trackNumber}`;
         const path = `audio/${item.audioSource.toLowerCase()}/${item.trackNumber}.mp3`;
         const exists = await checkFileExists(path);
+
+        alert(path);
         
         if (exists) {
             audioStatus[key] = 'local';

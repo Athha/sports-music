@@ -104,17 +104,26 @@ function updateStatus(key, text, className) {
     }
 }
 
-// フルパスを計算して表示する関数
-function displayFullPath() {
-    const currentPath = window.location.pathname;
-    const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
-    const fullPath = `${window.location.origin}${basePath}audio/`;
 
+// フルパスを計算して表示する関数
+function displayLocalAudioPath() {
     const pathInfo = document.getElementById('audio-full-path');
+    
+    // OSに応じたパス例を生成
+    const windowsPath = 'C:\\Users\\YourUsername\\Documents\\運動会\\audio\\';
+    const macLinuxPath = '/Users/YourUsername/Documents/運動会/audio/';
+
     pathInfo.innerHTML = `
-        <strong>フルパス:</strong> ${fullPath}<br><br>
+        <p>音源ファイルは、あなたのコンピューター上の適切な場所に保存してください。以下は推奨されるパスの例です：</p>
+        
+        <strong>Windowsの場合:</strong><br>
+        ${windowsPath}<br>
+        <br>
+        <strong>MacまたはLinuxの場合:</strong><br>
+        ${macLinuxPath}<br>
+        <br>
         <strong>ディレクトリ構造:</strong><br>
-        ${fullPath}<br>
+        audio/<br>
         ├── a/<br>
         │   ├── 01.mp3<br>
         │   ├── 02.mp3<br>
@@ -135,6 +144,5 @@ function displayFullPath() {
 document.addEventListener('DOMContentLoaded', () => {
     generateTable();
     checkAllFiles();
-    displayFullPath();  // この行を追加
+    displayLocalAudioPath();  // この行を変更
 });
-

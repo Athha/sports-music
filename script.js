@@ -5,10 +5,8 @@ let currentAudio = null;
 document.addEventListener('DOMContentLoaded', () => {
     loadFromLocalStorage();
     if (programData.length === 0) {
-        // 初期データがない場合、空の行を3つ追加
-        for (let i = 0; i < 3; i++) {
-            programData.push({ time: "", program: "", audioSource: "--", trackNumber: "01" });
-        }
+        // 初期データがない場合、空の行を1つ追加
+        programData.push({ time: "", program: "", audioSource: "--", trackNumber: "01", memo: "" });
     }
     renderProgramTable();
     setupEventListeners();
@@ -59,6 +57,7 @@ function renderProgramTable() {
                 <input type="number" min="1" max="99" value="${item.trackNumber}" 
                        onchange="updateProgram(${index}, 'trackNumber', this.value.padStart(2, '0'))" class="edit-select">
             </td>
+            <td><input type="text" value="${item.memo}" onchange="updateProgram(${index}, 'memo', this.value)"></td>
             <td id="status-${item.audioSource}-${item.trackNumber}"></td>
             <td>
                 <button onclick="toggleMusic('${item.audioSource}', '${item.trackNumber}')">▶ 再生/停止</button>
@@ -110,7 +109,7 @@ function toggleMusic(audioSource, trackNumber) {
 }
 
 function addProgram(index) {
-    programData.splice(index + 1, 0, { time: "", program: "", audioSource: "--", trackNumber: "01" });
+    programData.splice(index + 1, 0, { time: "", program: "", audioSource: "--", trackNumber: "01", memo: "" });
     renderProgramTable();
     saveToLocalStorage();
 }

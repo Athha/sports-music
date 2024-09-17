@@ -5,24 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>運動会プログラム</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.json">
-    <style>
-        .status-local { color: green; }
-        .status-not-found { color: red; }
-        #program-table { margin-bottom: 20px; }
-        .edit-select { width: 100%; }
-        .add-program, .delete-program { cursor: pointer; }
-        .add-program { color: green; }
-        .delete-program { color: red; }
-    </style>
 </head>
 <body>
     <h1>運動会プログラム</h1>
-    
-    <input type="file" id="audio-file-input" multiple accept="audio/*" style="display: none;">
+
+    <h2>使い方</h2>
+    <ol>
+        <li>音源ファイルを選択ボタンをクリックし、準備した音楽ファイルを選択してください。</li>
+        <li>プログラムの時間、内容、音源区分、トラック番号、メモを入力してください。</li>
+        <li>全ファイルの存在をチェックボタンで、必要な音源が揃っているか確認できます。</li>
+        <li>各行の再生/停止ボタンで音楽を制御できます。</li>
+    </ol>
+
+    <h3>音楽ファイルの準備方法</h3>
+    <ul>
+        <li>音楽ファイルを 01.mp3 - 99.mp3 といった2桁番号のmp3ファイル名で用意してください。</li>
+        <li>CDを複数枚用意している場合：A,B,Cのラベルをつけることができます。a01.mp3、a02.mp3、、、b01.mp3などのラベル付き2桁番号のmp3ファイル名にしておくと、わかりやすく便利です。</li>
+    </ul>
+
     <button id="select-audio-files">音源ファイルを選択</button>
+    <input type="file" id="audio-file-input" multiple accept=".mp3" style="display: none;">
+
     <button id="check-all-files">全ファイルの存在をチェック</button>
-    
+
     <table id="program-table">
         <thead>
             <tr>
@@ -30,13 +35,33 @@
                 <th>プログラム</th>
                 <th>音源区分</th>
                 <th>トラック番号</th>
+                <th>メモ</th>
                 <th>状態</th>
                 <th>音楽</th>
                 <th>操作</th>
             </tr>
         </thead>
         <tbody>
-            <!-- プログラムの内容はJavaScriptで動的に追加されます -->
+            <tr>
+                <td><input type="time"></td>
+                <td><input type="text"></td>
+                <td>
+                    <select>
+                        <option value="--">--</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                </td>
+                <td><input type="number" min="1" max="99" value="01"></td>
+                <td><input type="text"></td>
+                <td></td>
+                <td><button>▶ 再生/停止</button></td>
+                <td>
+                    <span class="add-program">＋</span>
+                    <span class="delete-program">✖</span>
+                </td>
+            </tr>
         </tbody>
     </table>
 
@@ -44,9 +69,11 @@
 
     <div id="audio-path-info">
         <h3>音源ファイルの命名規則：</h3>
-        <p>音源区分(a/b/c) + 2桁のトラック番号 + .mp3</p>
-        <p>音源区分が -- の場合: 2桁のトラック番号 + .mp3</p>
-        <p>例: a01.mp3, b15.mp3, c07.mp3, 01.mp3</p>
+        <p>
+            音源区分(a/b/c) + 2桁のトラック番号 + .mp3<br>
+            音源区分が -- の場合: 2桁のトラック番号 + .mp3<br>
+            例: a01.mp3, b15.mp3, c07.mp3, 01.mp3
+        </p>
     </div>
 
     <script src="script.js"></script>

@@ -2,8 +2,10 @@ let programData = [];
 let audioFiles = {};
 let currentAudio = null;
 let sortable;
+let isFileSystemAccessSupported = false;
 
 document.addEventListener('DOMContentLoaded', () => {
+    checkFileSystemAccessSupport();
     loadFromLocalStorage();
     if (programData.length === 0) {
         // 初期データの設定
@@ -21,11 +23,20 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProgramTable();
     setupEventListeners();
     initSortable();
+    checkAudioFilesStatus();
 });
+
+function checkFileSystemAccessSupport() {
+    isFileSystemAccessSupported = 'showOpenFilePicker' in window;
+}
 
 function setupEventListeners() {
     document.getElementById('select-audio-files').addEventListener('click', () => {
-        document.getElementById('audio-file-input').click();
+        if (isFileSystemAccessSupported) {
+            handleFileSelect();
+        } else {
+            document.getElementById('audio-file-input').click();
+        }
     });
 
     document.getElementById('audio-file-input').addEventListener('change', handleFileSelect);
@@ -35,6 +46,10 @@ function setupEventListeners() {
     document.getElementById('clear-storage').addEventListener('click', clearStorage);
 
     document.getElementById('stop-all-music').addEventListener('click', stopAllMusic);
+
+    window.addEventListener('focus', () => {
+        checkAudioFilesStatus();
+    });
 }
 
 function initSortable() {
@@ -53,8 +68,27 @@ function initSortable() {
     });
 }
 
-function handleFileSelect(event) {
-    const files = event.target.files;
+async function handleFileSelect(event) {
+    let files;
+    if (isFileSystemAccessSupported) {
+        try {
+            const fileHandles = await window.showOpenFilePicker({
+                multiple: true,
+                types: [{
+                    description: 'Audio Files',
+                    accept: {'audio/*': ['.mp3']}
+                }]
+            });
+            files = await Promise.all(fileHandles.map(handle => handle.getFile()));
+        } catch (err) {
+            console.error('File selection was cancelled or failed:', err);
+            return;
+        }
+    } else {
+        files = event.target.files;
+    }
+
+    audioFiles = {};
     for (let file of files) {
         const match = file.name.match(/^(?:([abc]))?(\d{2})\.mp3$/i);
         if (match) {
@@ -65,6 +99,33 @@ function handleFileSelect(event) {
     }
     renderProgramTable();
     saveToLocalStorage();
+    checkAudioFilesStatus();
+}
+
+function checkAudioFilesStatus() {
+    let missingFiles = false;
+    programData.forEach((item, index) => {
+        if (!item.isSection && item.audioSource !== "--" && item.trackNumber) {
+            const key = item.audioSource === '--' ? item.trackNumber : `${item.audioSource}-${item.trackNumber}`;
+            if (!audioFiles[key]) {
+                missingFiles = true;
+                updateStatus(index, 'not-found');
+            } else {
+                updateStatus(index, 'local');
+            }
+        }
+    });
+
+    const statusMessage = document.getElementById('status-message');
+    if (missingFiles) {
+        statusMessage.textContent = '一部の音楽ファイルが見つかりません。ファイルを再選択してください。';
+        statusMessage.style.display = 'block';
+    } else if (Object.keys(audioFiles).length === 0) {
+        statusMessage.textContent = '音楽ファイルが選択されていません。ファイルを選択してください。';
+        statusMessage.style.display = 'block';
+    } else {
+        statusMessage.style.display = 'none';
+    }
 }
 
 function renderProgramTable() {
@@ -296,11 +357,15 @@ function clearStorage() {
 function saveToLocalStorage() {
     localStorage.setItem('programData', JSON.stringify(programData));
     
-    const audioFileNames = Object.keys(audioFiles).reduce((acc, key) => {
-        acc[key] = audioFiles[key].name;
+    // AudioFileのメタデータのみを保存
+    const audioFileMetadata = Object.keys(audioFiles).reduce((acc, key) => {
+        acc[key] = {
+            name: audioFiles[key].name,
+            lastModified: audioFiles[key].lastModified
+        };
         return acc;
     }, {});
-    localStorage.setItem('audioFileNames', JSON.stringify(audioFileNames));
+    localStorage.setItem('audioFileMetadata', JSON.stringify(audioFileMetadata));
 }
 
 function loadFromLocalStorage() {
@@ -309,13 +374,15 @@ function loadFromLocalStorage() {
         programData = JSON.parse(savedProgramData);
     }
 
-    const savedAudioFileNames = localStorage.getItem('audioFileNames');
-    if (savedAudioFileNames) {
-        const fileNames = JSON.parse(savedAudioFileNames);
-        audioFiles = Object.keys(fileNames).reduce((acc, key) => {
-            acc[key] = { name: fileNames[key] };
+    const savedAudioFileMetadata = localStorage.getItem('audioFileMetadata');
+    if (savedAudioFileMetadata) {
+        const metadata = JSON.parse(savedAudioFileMetadata);
+        audioFiles = Object.keys(metadata).reduce((acc, key) => {
+            acc[key] = {
+                name: metadata[key].name,
+                lastModified: metadata[key].lastModified
+            };
             return acc;
         }, {});
     }
 }
-

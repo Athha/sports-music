@@ -27,7 +27,7 @@ function setupEventListeners() {
     document.getElementById('stop-all-music').addEventListener('click', stopAllMusic);
     
     // テーブルへの直接ペーストを処理するイベントリスナーを追加
-    document.getElementById('program-table').addEventListener('paste', handleTablePaste);
+    document.getElementById('program-body').addEventListener('paste', handleTablePaste);
 }
 
 function handleTablePaste(e) {
@@ -37,25 +37,31 @@ function handleTablePaste(e) {
     
     const newData = rows.map(row => {
         const [order, program, memo] = row.split('\t');
-        return { order: order.trim(), program: program.trim(), memo: memo.trim() };
+        return { 
+            order: order ? order.trim() : '', 
+            program: program ? program.trim() : '', 
+            memo: memo ? memo.trim() : '' 
+        };
     });
 
     // 既存のデータを更新または新しいデータを追加
     newData.forEach(item => {
-        if (item.order && item.program) {  // 順序とプログラム名が存在する場合のみ処理
+        if (item.program) {  // プログラム名が存在する場合のみ処理
             const existingIndex = programData.findIndex(existing => 
                 existing.order === item.order && !existing.isSection);
             
             if (existingIndex !== -1) {
                 // 既存のデータを更新
                 programData[existingIndex].program = item.program;
-                programData[existingIndex].memo = item.memo || programData[existingIndex].memo;
+                if (item.memo) {
+                    programData[existingIndex].memo = item.memo;
+                }
             } else {
                 // 新しいデータを追加
                 programData.push({
                     order: item.order,
                     program: item.program,
-                    memo: item.memo || '',
+                    memo: item.memo,
                     audioFile: null,
                     isSection: false
                 });

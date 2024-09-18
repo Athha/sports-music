@@ -1,8 +1,8 @@
-import { initializeApp } from '/js/app.js';
-import { setupEventListeners } from '/js/eventListeners.js';
-import { initSortable } from '/js/sortable.js';
-import { displayVersion } from '/js/version.js';
-import { checkAudioFileStatus } from '/js/audioUtils.js';
+import { initializeApp } from '/sports-music/js/app.js';
+import { setupEventListeners } from '/sports-music/js/eventListeners.js';
+import { initSortable } from '/sports-music/js/sortable.js';
+import { displayVersion } from '/sports-music/js/version.js';
+import { checkAudioFileStatus } from '/sports-music/js/audioUtils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeApp();
@@ -12,5 +12,4 @@ document.addEventListener('DOMContentLoaded', () => {
     checkAudioFileStatus();
 });
 
-// デバッグ用のコンソールログを追加
 console.log('main.js is loaded');

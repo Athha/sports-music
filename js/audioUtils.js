@@ -1,4 +1,4 @@
-import { programData, updateProgramData } from './app.js';
+import { programData, updateProgramData } from '/sports-music/js/app.js';
 
 let currentAudio = null;
 let currentAudioIndex = null;

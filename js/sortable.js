@@ -1,4 +1,4 @@
-import { programData, updateProgramData } from './app.js';
+import { programData, updateProgramData } from '/sports-music/js/app.js';
 
 export function initSortable() {
     const el = document.getElementById('program-body');

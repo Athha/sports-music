@@ -1,5 +1,5 @@
-import { programData, updateProgramData } from './app.js';
-import { saveToLocalStorage } from './storage.js';
+import { programData, updateProgramData } from '/sports-music/js/app.js';
+import { saveToLocalStorage } from '/sports-music/js/storage.js';
 
 export function addSection(index) {
     programData.splice(index + 1, 0, {

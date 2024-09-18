@@ -1,5 +1,5 @@
-import { loadFromLocalStorage, saveToLocalStorage } from './storage.js';
-import { renderProgramTable } from './render.js';
+import { loadFromLocalStorage, saveToLocalStorage } from '/sports-music/js/storage.js';
+import { renderProgramTable } from '/sports-music/js/render.js';
 
 export let programData = [];
 

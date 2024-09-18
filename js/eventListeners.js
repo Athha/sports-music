@@ -1,5 +1,5 @@
-import { checkAllFiles, clearStorage } from './programUtils.js';
-import { stopAllMusic } from './audioUtils.js';
+import { checkAllFiles, clearStorage } from '/sports-music/js/programUtils.js';
+import { stopAllMusic } from '/sports-music/js/audioUtils.js';
 
 export function setupEventListeners() {
     document.getElementById('check-all-files').addEventListener('click', checkAllFiles);

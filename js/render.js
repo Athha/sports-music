@@ -1,7 +1,7 @@
-import { programData } from './app.js';
-import { handleFileSelect, toggleMusic } from './audioUtils.js';
-import { addProgram, addSection, deleteProgram, updateProgram } from './programUtils.js';
-import { handleOrderPaste } from './pasteUtils.js';
+import { programData } from '/sports-music/js/app.js';
+import { handleFileSelect, toggleMusic } from '/sports-music/js/audioUtils.js';
+import { addProgram, addSection, deleteProgram, updateProgram } from '/sports-music/js/programUtils.js';
+import { handleOrderPaste } from '/sports-music/js/pasteUtils.js';
 
 export function renderProgramTable() {
     const tableBody = document.querySelector('#program-table tbody');

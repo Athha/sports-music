@@ -1,6 +1,7 @@
 let programData = [];
 let audioFiles = {};
 let currentAudio = null;
+let sortable;
 
 document.addEventListener('DOMContentLoaded', () => {
     loadFromLocalStorage();
@@ -9,7 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     renderProgramTable();
     setupEventListeners();
+    initSortable();
 });
+
 
 function setupEventListeners() {
     document.getElementById('select-audio-files').addEventListener('click', () => {
@@ -23,18 +26,24 @@ function setupEventListeners() {
     document.getElementById('add-section').addEventListener('click', addSection);
 }
 
-function handleFileSelect(event) {
-    const files = event.target.files;
-    for (let file of files) {
-        const match = file.name.match(/^(?:([abc]))?(\d{2})\.mp3$/i);
-        if (match) {
-            const [, source, number] = match;
-            const key = source ? `${source.toUpperCase()}-${number}` : number;
-            audioFiles[key] = file;
+
+
+function initSortable() {
+    const el = document.getElementById('program-body');
+    sortable = Sortable.create(el, {
+        animation: 150,
+        onEnd: function (evt) {
+            const itemEl = evt.item;
+            const newIndex = evt.newIndex;
+            const oldIndex = evt.oldIndex;
+            
+            // プログラムデータの順序を更新
+            const [movedItem] = programData.splice(oldIndex, 1);
+            programData.splice(newIndex, 0, movedItem);
+            
+            saveToLocalStorage();
         }
-    }
-    renderProgramTable();
-    saveToLocalStorage();
+    });
 }
 
 function renderProgramTable() {
@@ -42,7 +51,8 @@ function renderProgramTable() {
     tableBody.innerHTML = '';
     
     programData.forEach((item, index) => {
-        const row = tableBody.insertRow();
+        const row = document.createElement('tr');
+        row.setAttribute('data-id', index);
         if (item.isSection) {
             row.innerHTML = `
                 <td colspan="7" style="background-color: #f0f0f0;">
@@ -80,10 +90,13 @@ function renderProgramTable() {
                 </td>
             `;
         }
+        tableBody.appendChild(row);
     });
     
     updateAudioStatus();
 }
+
+
 
 function updateAudioStatus() {
     programData.forEach(item => {
@@ -148,13 +161,6 @@ function deleteProgram(index) {
 
 function updateProgram(index, field, value) {
     programData[index][field] = value;
-    if (field === 'time' && !programData[index].isSection) {
-        programData.sort((a, b) => {
-            if (a.isSection !== b.isSection) return a.isSection ? -1 : 1;
-            return a.time.localeCompare(b.time);
-        });
-    }
-    renderProgramTable();
     saveToLocalStorage();
 }
 

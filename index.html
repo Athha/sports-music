@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>運動会プログラム</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 </head>
 <body>
     <h1>運動会プログラム</h1>
@@ -22,6 +23,7 @@
         <li>音楽ファイルを 01.mp3 - 99.mp3 といった2桁番号のmp3ファイル名で用意してください。</li>
         <li>CDを複数枚用意している場合：A,B,Cのラベルをつけることができます。a01.mp3、a02.mp3、、、b01.mp3などのラベル付き2桁番号のmp3ファイル名にしておくと、わかりやすく便利です。</li>
     </ul>
+
 
     <button id="select-audio-files">音源ファイルを選択</button>
     <input type="file" id="audio-file-input" multiple accept=".mp3" style="display: none;">
@@ -41,10 +43,11 @@
                 <th>操作</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="program-body">
             <!-- JavaScript will populate this -->
         </tbody>
     </table>
+
 
     <p>新しい行を追加するには、「＋」ボタンをクリックしてください。</p>
 

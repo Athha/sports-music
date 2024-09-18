@@ -3,7 +3,7 @@ body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
     color: #333;
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background-color: #f4f4f4;
@@ -60,8 +60,59 @@ button:hover {
     background-color: #1d3557;
 }
 
+/* 状態表示スタイル */
+.status-local {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.status-not-found {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* 操作ボタンスタイル */
+.add-program, .add-section, .delete-program {
+    cursor: pointer;
+    padding: 5px;
+    margin: 0 2px;
+    border-radius: 3px;
+    transition: background-color 0.3s;
+}
+
+.add-program {
+    color: #2ecc71;
+}
+
+.add-section {
+    color: #3498db;
+}
+
+.delete-program {
+    color: #e74c3c;
+}
+
+.add-program:hover, .add-section:hover, .delete-program:hover {
+    background-color: #f0f0f0;
+}
+
+/* セクション行スタイル */
+tr[data-id] td[colspan="7"] {
+    background-color: #ecf0f1;
+    font-weight: bold;
+}
+
+/* 入力フィールドスタイル */
+input[type="text"], input[type="time"], input[type="number"], select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
 /* レスポンシブデザイン */
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 1200px) {
     body {
         padding: 10px;
     }

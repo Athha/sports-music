@@ -1,6 +1,6 @@
 console.log('version.js is executing');
 
-const APP_VERSION = "1.1.5";
+const APP_VERSION = "1.1.6";
 
 export function displayVersion() {
     console.log('Displaying version:', APP_VERSION);

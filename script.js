@@ -51,7 +51,7 @@ function renderProgramTable() {
         if (item.isSection) {
             row.innerHTML = `
                 <td colspan="7" style="background-color: #f0f0f0;">
-                    <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: 100%; background-color: transparent; border: none;">
+                    <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: 100%; background-color: transparent; border: none;" placeholder="セクション名を入力">
                 </td>
                 <td>
                     <span class="add-program" onclick="addProgram(${index})">＋</span>
@@ -94,19 +94,16 @@ function renderProgramTable() {
 }
 
 function addSection(index) {
-    const sectionName = prompt("セクション名を入力してください：");
-    if (sectionName) {
-        programData.splice(index, 0, {
-            time: "",
-            program: sectionName,
-            audioSource: "--",
-            trackNumber: "",
-            memo: "",
-            isSection: true
-        });
-        renderProgramTable();
-        saveToLocalStorage();
-    }
+    programData.splice(index, 0, {
+        time: "",
+        program: "",
+        audioSource: "--",
+        trackNumber: "",
+        memo: "",
+        isSection: true
+    });
+    renderProgramTable();
+    saveToLocalStorage();
 }
 
 function addProgram(index) {

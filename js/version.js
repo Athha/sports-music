@@ -1,6 +1,6 @@
-onsole.log('version.js is executing');
+console.log('version.js is executing');
 
-const APP_VERSION = "1.1.3";
+const APP_VERSION = "1.1.0";
 
 export function displayVersion() {
     console.log('Displaying version:', APP_VERSION);
@@ -13,4 +13,4 @@ export function displayVersion() {
     }
 }
 
-console.log('version.js execution completed');}
+console.log('version.js execution completed');

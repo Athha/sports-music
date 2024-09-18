@@ -51,7 +51,7 @@ function renderProgramTable() {
             row.innerHTML = `
                 <td>
                     <span class="drag-handle">≡</span>
-                    <input type="text" value="${item.order || ''}" onchange="updateProgram(${index}, 'order', this.value)" placeholder="順序" class="order-input">
+                    <input type="text" value="${item.order || ''}" onchange="updateProgram(${index}, 'order', this.value)" placeholder="順" class="order-input" maxlength="2">
                 </td>
                 <td><input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)"></td>
                 <td>

@@ -109,17 +109,12 @@ button:hover {
 }
 
 /* セクション行のスタイル */
-tr[data-id] td[colspan="5"] {
+tr[data-id][data-is-section="true"] td {
     background-color: #e6f2ff; /* 薄い青色 */
     font-weight: bold;
 }
 
-tr[data-id] td[colspan="5"] input {
-    font-weight: bold;
-    background-color: transparent;
-}
-
-tr[data-id] td[colspan="5"] input {
+tr[data-id][data-is-section="true"] input {
     font-weight: bold;
     background-color: transparent;
 }

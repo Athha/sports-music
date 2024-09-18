@@ -123,8 +123,12 @@ function updateAudioStatus() {
     programData.forEach((item, index) => {
         if (!item.isSection) {
             const key = item.audioSource === '--' ? item.trackNumber : `${item.audioSource}-${item.trackNumber}`;
-            if (audioFiles[key]) {
-                updateStatus(index, 'local');
+            if (item.audioSource !== "--" && item.trackNumber) {
+                if (audioFiles[key]) {
+                    updateStatus(index, 'local');
+                } else {
+                    updateStatus(index, 'not-found');
+                }
             } else {
                 updateStatus(index, 'not-found');
             }
@@ -133,7 +137,8 @@ function updateAudioStatus() {
 }
 
 function updateStatus(index, status) {
-    const statusElement = document.getElementById(`status-${programData[index].audioSource}-${programData[index].trackNumber}`);
+    const item = programData[index];
+    const statusElement = document.getElementById(`status-${item.audioSource}-${item.trackNumber}`);
     if (statusElement) {
         if (status === 'local') {
             statusElement.textContent = 'ローカル';
@@ -208,24 +213,28 @@ function checkAllFiles() {
     let missingFiles = [];
     let allFound = true;
     programData.forEach((item, index) => {
-        if (!item.isSection && item.audioSource !== "--" && item.trackNumber) {
-            const key = `${item.audioSource}-${item.trackNumber}`;
-            if (!audioFiles[key]) {
-                missingFiles.push(`${item.program}: ${key}.mp3`);
-                allFound = false;
-                updateStatus(index, 'not-found');
+        if (!item.isSection) {
+            const key = item.audioSource === '--' ? item.trackNumber : `${item.audioSource}-${item.trackNumber}`;
+            if (item.audioSource !== "--" && item.trackNumber) {
+                if (!audioFiles[key]) {
+                    missingFiles.push(`${item.program}: ${key}.mp3`);
+                    allFound = false;
+                    updateStatus(index, 'not-found');
+                } else {
+                    updateStatus(index, 'local');
+                }
             } else {
-                updateStatus(index, 'local');
+                updateStatus(index, 'not-found');
             }
-        } else if (!item.isSection) {
-            updateStatus(index, 'not-found');
         }
     });
 
     if (!allFound) {
         alert('以下のファイルが見つかりません:\n' + missingFiles.join('\n'));
-    } else {
+    } else if (missingFiles.length === 0) {
         alert('全ての音源ファイルが見つかりました。');
+    } else {
+        alert('音源が設定されていない項目があります。');
     }
     renderProgramTable(); // テーブルを再描画して状態を更新
 }
@@ -276,4 +285,3 @@ function loadFromLocalStorage() {
         }, {});
     }
 }
-

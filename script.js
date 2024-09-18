@@ -25,6 +25,47 @@ function setupEventListeners() {
     document.getElementById('check-all-files').addEventListener('click', checkAllFiles);
     document.getElementById('clear-storage').addEventListener('click', clearStorage);
     document.getElementById('stop-all-music').addEventListener('click', stopAllMusic);
+    
+    // テーブルへの直接ペーストを処理するイベントリスナーを追加
+    document.getElementById('program-table').addEventListener('paste', handleTablePaste);
+}
+
+function handleTablePaste(e) {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text');
+    const rows = pastedData.trim().split('\n');
+    
+    const newData = rows.map(row => {
+        const [order, program, memo] = row.split('\t');
+        return { order: order.trim(), program: program.trim(), memo: memo.trim() };
+    });
+
+    // 既存のデータを更新または新しいデータを追加
+    newData.forEach(item => {
+        if (item.order && item.program) {  // 順序とプログラム名が存在する場合のみ処理
+            const existingIndex = programData.findIndex(existing => 
+                existing.order === item.order && !existing.isSection);
+            
+            if (existingIndex !== -1) {
+                // 既存のデータを更新
+                programData[existingIndex].program = item.program;
+                programData[existingIndex].memo = item.memo || programData[existingIndex].memo;
+            } else {
+                // 新しいデータを追加
+                programData.push({
+                    order: item.order,
+                    program: item.program,
+                    memo: item.memo || '',
+                    audioFile: null,
+                    isSection: false
+                });
+            }
+        }
+    });
+
+    // テーブルを再描画
+    renderProgramTable();
+    saveToLocalStorage();
 }
 
 function renderProgramTable() {

@@ -37,7 +37,24 @@ th {
     color: #fff;
 }
 
-tr:nth-child(even) {
+/* セクション行のスタイル */
+tr[data-is-section="true"] td {
+    background-color: #e6f2ff; /* 薄い青色 */
+    font-weight: bold;
+}
+
+tr[data-is-section="true"] input {
+    font-weight: bold;
+    background-color: transparent;
+}
+
+/* プログラム行のスタイル */
+tr[data-is-section="false"] td {
+    background-color: #ffffff; /* 白色 */
+}
+
+/* 偶数行の背景色 */
+tr[data-is-section="false"]:nth-child(even) {
     background-color: #f2f2f2;
 }
 
@@ -85,6 +102,11 @@ button:hover {
     font-weight: bold;
 }
 
+.status-reselect {
+    color: #f39c12;
+    font-weight: bold;
+}
+
 /* 操作ボタンスタイル */
 .add-program, .add-section, .delete-program, .drag-handle {
     cursor: pointer;
@@ -106,17 +128,6 @@ button:hover {
 
 .delete-program {
     color: #e74c3c;
-}
-
-/* セクション行のスタイル */
-tr[data-id][data-is-section="true"] td {
-    background-color: #e6f2ff; /* 薄い青色 */
-    font-weight: bold;
-}
-
-tr[data-id][data-is-section="true"] input {
-    font-weight: bold;
-    background-color: transparent;
 }
 
 /* 入力フィールドスタイル */
@@ -157,12 +168,6 @@ input[type="text"], input[type="time"], input[type="number"], select {
     padding: 2px;
     font-size: 0.9em;
     margin-left: 2px;
-}
-
-/* テーブルセルのパディングを調整 */
-td {
-    padding: 4px;
-    vertical-align: middle;
 }
 
 /* レスポンシブデザイン */
@@ -226,3 +231,4 @@ input:focus, button:focus, select:focus {
 input:hover, button:hover, select:hover {
     border-color: #457b9d;
 }
+

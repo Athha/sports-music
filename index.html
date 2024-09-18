@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>運動会プログラム</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 </head>
 <body>
     <h1>運動会プログラム</h1>
 
-    <h2>使い方</h2>
-    <ol>
-        <li>各プログラム行の「音楽選択」ボタンをクリックし、対応する音楽ファイルを選択してください。</li>
-        <li>プログラムの内容、メモを入力してください。</li>
-        <li>全ファイルの存在をチェックボタンで、必要な音源が揃っているか確認できます。</li>
-        <li>各行の再生/停止ボタンで音楽を制御できます。</li>
-        <li>「≡」アイコンをドラッグ＆ドロップして順序を変更できます。</li>
-        <li>「＋」ボタンで新しいプログラム行を追加、「＊」ボタンで新しいセクションを追加、「✖」ボタンで行を削除できます。</li>
-    </ol>
+    <p>
+        1. 各プログラム行の「音楽選択」ボタンをクリックし、対応する音楽ファイルを選択してください。<br>
+        2. プログラムの内容、メモを入力してください。<br>
+        3. 全ファイルの存在をチェックボタンで、必要な音源が揃っているか確認できます。<br>
+        4. 各行の再生/停止ボタンで音楽を制御できます。<br>
+        5. 「≡」アイコンをドラッグ＆ドロップして順序を変更できます。<br>
+        6. 「＋」ボタンで新しいプログラム行を追加、「＊」ボタンで新しいセクションを追加、「✖」ボタンで行を削除できます。
+    </p>
 
     <button id="check-all-files">全ファイルの存在をチェック</button>
     <button id="clear-storage">データをクリア</button>
@@ -36,15 +36,14 @@
             </tr>
         </thead>
         <tbody id="program-body">
-            <!-- プログラムの行がここに動的に追加されます -->
+            <!-- プログラムデータがここに挿入されます -->
         </tbody>
     </table>
 
     <div id="version-info" style="margin-top: 20px; font-size: 0.8em; color: #666;">
         バージョン: <span id="app-version"></span>
     </div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
-    <script src="script.js"></script>
+
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

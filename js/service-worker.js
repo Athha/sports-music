@@ -1,15 +1,24 @@
-const CACHE_NAME = 'sports-day-cache-v1';
+const CACHE_NAME = 'sports-day-cache-v1.1.0';
 const urlsToCache = [
   '/',
   '/index.html',
   '/styles.css',
-  '/script.js',
+  '/js/main.js',
+  '/js/app.js',
+  '/js/eventListeners.js',
+  '/js/sortable.js',
+  '/js/version.js',
+  '/js/audioUtils.js',
+  '/js/render.js',
+  '/js/storage.js',
+  '/js/programUtils.js',
+  '/js/pasteUtils.js',
   '/manifest.json',
   '/icon-192x192.png',
   '/icon-512x512.png',
-  // 音楽ファイルをキャッシュに追加
-  '/fanfare.mp3',
-  '/run.mp3',
+  // 音楽ファイルをキャッシュに追加（パスが変更されている場合は更新）
+  '/assets/fanfare.mp3',
+  '/assets/run.mp3',
   // 他の音楽ファイルも同様に追加
 ];
 

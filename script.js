@@ -27,8 +27,8 @@ function initSortable() {
     const el = document.getElementById('program-body');
     sortable = Sortable.create(el, {
         animation: 150,
+        // handleクラスを削除し、行全体をドラッグ可能にする
         onEnd: function (evt) {
-            const itemEl = evt.item;
             const newIndex = evt.newIndex;
             const oldIndex = evt.oldIndex;
             
@@ -47,9 +47,11 @@ function renderProgramTable() {
     programData.forEach((item, index) => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', index);
+        // カーソルスタイルを変更して、ドラッグ可能であることを示す
+        row.style.cursor = 'move';
         if (item.isSection) {
             row.innerHTML = `
-                <td colspan="7" style="background-color: #f0f0f0;">
+                <td colspan="8" style="background-color: #f0f0f0;">
                     <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: 100%; background-color: transparent; border: none;">
                 </td>
                 <td>

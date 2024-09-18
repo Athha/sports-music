@@ -33,6 +33,8 @@ function setupEventListeners() {
     document.getElementById('check-all-files').addEventListener('click', checkAllFiles);
 
     document.getElementById('clear-storage').addEventListener('click', clearStorage);
+
+    document.getElementById('stop-all-music').addEventListener('click', stopAllMusic);
 }
 
 function initSortable() {
@@ -104,7 +106,7 @@ function renderProgramTable() {
                 <td><input type="text" value="${item.memo}" onchange="updateProgram(${index}, 'memo', this.value)"></td>
                 <td id="status-${item.audioSource}-${item.trackNumber}"></td>
                 <td>
-                    <button onclick="toggleMusic('${item.audioSource}', '${item.trackNumber}')">▶ 再生/停止</button>
+                    <button onclick="toggleMusic('${item.audioSource}', '${item.trackNumber}')">▶ 再生</button>
                 </td>
                 <td>
                     <span class="add-program" onclick="addProgram(${index})">＋</span>
@@ -155,19 +157,50 @@ function toggleMusic(audioSource, trackNumber) {
     const audioFile = audioFiles[key];
 
     if (currentAudio) {
-        currentAudio.pause();
         if (currentAudio.src === URL.createObjectURL(audioFile)) {
-            currentAudio = null;
+            if (currentAudio.paused) {
+                currentAudio.play();
+                updatePlayButtonText(audioSource, trackNumber, '■ 停止');
+            } else {
+                currentAudio.pause();
+                updatePlayButtonText(audioSource, trackNumber, '▶ 再生');
+            }
             return;
+        } else {
+            currentAudio.pause();
+            updateAllPlayButtonsText();
         }
     }
 
     if (audioFile) {
         currentAudio = new Audio(URL.createObjectURL(audioFile));
         currentAudio.play();
+        updatePlayButtonText(audioSource, trackNumber, '■ 停止');
     } else {
         alert('音源ファイルが見つかりません。ファイルを選択してください。');
     }
+}
+
+function stopAllMusic() {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+    }
+    updateAllPlayButtonsText();
+}
+
+function updatePlayButtonText(audioSource, trackNumber, text) {
+    const button = document.querySelector(`button[onclick="toggleMusic('${audioSource}', '${trackNumber}')"]`);
+    if (button) {
+        button.textContent = text;
+    }
+}
+
+function updateAllPlayButtonsText() {
+    const buttons = document.querySelectorAll('button[onclick^="toggleMusic"]');
+    buttons.forEach(button => {
+        button.textContent = '▶ 再生';
+    });
 }
 
 function addSection(index) {
@@ -285,3 +318,4 @@ function loadFromLocalStorage() {
         }, {});
     }
 }
+

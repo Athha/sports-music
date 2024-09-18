@@ -6,7 +6,17 @@ let sortable;
 document.addEventListener('DOMContentLoaded', () => {
     loadFromLocalStorage();
     if (programData.length === 0) {
-        programData.push({ time: "", program: "", audioSource: "--", trackNumber: "01", memo: "", isSection: false });
+        // 初期データの設定
+        programData = [
+            { time: "", program: "開会式", audioSource: "--", trackNumber: "", memo: "", isSection: true },
+            { time: "", program: "入場", audioSource: "--", trackNumber: "", memo: "", isSection: false },
+            { time: "", program: "はじめのことば", audioSource: "--", trackNumber: "", memo: "", isSection: false },
+            { time: "", program: "君が代の歌", audioSource: "--", trackNumber: "", memo: "", isSection: false },
+            { time: "", program: "演技", audioSource: "--", trackNumber: "", memo: "", isSection: true },
+            { time: "", program: "力を合わせて", audioSource: "--", trackNumber: "", memo: "", isSection: false },
+            { time: "", program: "閉会式", audioSource: "--", trackNumber: "", memo: "", isSection: true },
+            { time: "", program: "入場", audioSource: "--", trackNumber: "", memo: "", isSection: false }
+        ];
     }
     renderProgramTable();
     setupEventListeners();
@@ -211,7 +221,17 @@ function clearStorage() {
     if (confirm('保存されているデータをすべて消去し、初期状態に戻しますか？この操作は取り消せません。')) {
         localStorage.removeItem('programData');
         localStorage.removeItem('audioFileNames');
-        programData = [{ time: "", program: "", audioSource: "--", trackNumber: "01", memo: "", isSection: false }];
+        // 初期データの再設定
+        programData = [
+            { time: "", program: "開会式", audioSource: "--", trackNumber: "", memo: "", isSection: true },
+            { time: "", program: "入場", audioSource: "--", trackNumber: "", memo: "", isSection: false },
+            { time: "", program: "はじめのことば", audioSource: "--", trackNumber: "", memo: "", isSection: false },
+            { time: "", program: "君が代の歌", audioSource: "--", trackNumber: "", memo: "", isSection: false },
+            { time: "", program: "演技", audioSource: "--", trackNumber: "", memo: "", isSection: true },
+            { time: "", program: "力を合わせて", audioSource: "--", trackNumber: "", memo: "", isSection: false },
+            { time: "", program: "閉会式", audioSource: "--", trackNumber: "", memo: "", isSection: true },
+            { time: "", program: "入場", audioSource: "--", trackNumber: "", memo: "", isSection: false }
+        ];
         audioFiles = {};
         renderProgramTable();
         alert('データが消去され、初期状態に戻りました。');
@@ -243,4 +263,3 @@ function loadFromLocalStorage() {
         }, {});
     }
 }
-

@@ -47,11 +47,10 @@ function renderProgramTable() {
     programData.forEach((item, index) => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', index);
-        // カーソルスタイルを変更して、ドラッグ可能であることを示す
         row.style.cursor = 'move';
         if (item.isSection) {
             row.innerHTML = `
-                <td colspan="8" style="background-color: #f0f0f0;">
+                <td colspan="7" style="background-color: #f0f0f0;">
                     <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: 100%; background-color: transparent; border: none;">
                 </td>
                 <td>
@@ -97,14 +96,28 @@ function renderProgramTable() {
 function addSection(index) {
     const sectionName = prompt("セクション名を入力してください：");
     if (sectionName) {
-        programData.splice(index, 0, { program: sectionName, isSection: true });
+        programData.splice(index, 0, {
+            time: "",
+            program: sectionName,
+            audioSource: "--",
+            trackNumber: "",
+            memo: "",
+            isSection: true
+        });
         renderProgramTable();
         saveToLocalStorage();
     }
 }
 
 function addProgram(index) {
-    programData.splice(index + 1, 0, { time: "", program: "", audioSource: "--", trackNumber: "01", memo: "", isSection: false });
+    programData.splice(index + 1, 0, {
+        time: "",
+        program: "",
+        audioSource: "--",
+        trackNumber: "01",
+        memo: "",
+        isSection: false
+    });
     renderProgramTable();
     saveToLocalStorage();
 }

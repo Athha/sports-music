@@ -88,6 +88,7 @@ function renderProgramTable() {
                 </td>
                 <td>
                     <input type="number" min="1" max="99" value="${item.trackNumber}" 
+                           oninput="this.value = this.value.padStart(2, '0')"
                            onchange="updateProgram(${index}, 'trackNumber', this.value.padStart(2, '0'))" class="edit-select">
                 </td>
                 <td><input type="text" value="${item.memo}" onchange="updateProgram(${index}, 'memo', this.value)"></td>
@@ -187,20 +188,23 @@ function updateProgram(index, field, value) {
 
 function checkAllFiles() {
     let missingFiles = [];
+    let allFound = true;
     programData.forEach(item => {
         if (!item.isSection && item.time && item.program) {
             const key = item.audioSource === '--' ? item.trackNumber : `${item.audioSource}-${item.trackNumber}`;
             if (!audioFiles[key]) {
                 missingFiles.push(`${item.program}: ${key}.mp3`);
+                allFound = false;
             }
         }
     });
 
-    if (missingFiles.length > 0) {
+    if (!allFound) {
         alert('以下のファイルが見つかりません:\n' + missingFiles.join('\n'));
     } else {
         alert('全ての音源ファイルが見つかりました。');
     }
+    updateAudioStatus();
 }
 
 function clearStorage() {

@@ -1,23 +1,30 @@
 import { programData, updateProgramData } from '/sports-music/js/app.js';
 
-let currentAudio = null;
-let currentAudioIndex = null;
-
 export function checkAudioFileStatus() {
-    programData.forEach((item, index) => {
+    console.log('Checking audio file status');
+    if (!programData || !Array.isArray(programData)) {
+        console.error('Program data is not initialized or is not an array');
+        return;
+    }
+    
+    const updatedProgramData = programData.map(item => {
         if (!item.isSection && item.audioFile) {
             if (!isValidBlobUrl(item.audioFile)) {
-                updateStatus(index, 'reselect');
-                item.audioFile = null; // ファイル情報をクリア
+                console.log('Updating status for item:', item);
+                return { ...item, audioFile: null };
             }
         }
+        return item;
     });
-    updateProgramData(programData);
+
+    updateProgramData(updatedProgramData);
+    console.log('Audio file status check completed');
 }
 
 function isValidBlobUrl(file) {
     return file && file instanceof File;
 }
+
 
 export function handleFileSelect(event, index) {
     const file = event.target.files[0];

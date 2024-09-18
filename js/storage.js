@@ -5,9 +5,13 @@ export function loadFromLocalStorage() {
     const savedData = localStorage.getItem('programData');
     if (savedData) {
         console.log('Data found in local storage');
-        const parsedData = JSON.parse(savedData);
-        // audioFileのメタデータを実際のFileオブジェクトに変換する処理は省略
-        return parsedData;
+        try {
+            const parsedData = JSON.parse(savedData);
+            return Array.isArray(parsedData) ? parsedData : [];
+        } catch (error) {
+            console.error('Error parsing data from local storage:', error);
+            return [];
+        }
     } else {
         console.log('No data found in local storage');
         return [];
@@ -16,8 +20,12 @@ export function loadFromLocalStorage() {
 
 export function saveToLocalStorage(programData) {
     console.log('Saving data to local storage', programData);
+    if (!programData || !Array.isArray(programData)) {
+        console.error('Invalid program data provided to saveToLocalStorage');
+        return;
+    }
     const dataToSave = programData.map(item => {
-        if (item.audioFile) {
+        if (item && item.audioFile) {
             return {
                 ...item,
                 audioFile: {

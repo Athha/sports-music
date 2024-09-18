@@ -1,5 +1,8 @@
 import { programData, updateProgramData } from '/sports-music/js/app.js';
 
+let currentAudio = null;
+let currentAudioIndex = null;
+
 export function checkAudioFileStatus() {
     console.log('Checking audio file status');
     if (!programData || !Array.isArray(programData)) {
@@ -25,7 +28,6 @@ function isValidBlobUrl(file) {
     return file && file instanceof File;
 }
 
-
 export function handleFileSelect(event, index) {
     const file = event.target.files[0];
     if (file) {
@@ -36,8 +38,8 @@ export function handleFileSelect(event, index) {
     }
 }
 
-
 export function toggleMusic(index) {
+    console.log('Toggling music for index:', index);
     const item = programData[index];
     if (!item.audioFile) {
         alert('音楽ファイルが選択されていません。');
@@ -57,7 +59,6 @@ export function toggleMusic(index) {
             currentAudio.pause();
             updatePlayButtonText(currentAudioIndex, '▶ 再生');
         }
-        // ファイルのパスが正しいことを確認
         const audioUrl = URL.createObjectURL(item.audioFile);
         currentAudio = new Audio(audioUrl);
         currentAudioIndex = index;
@@ -97,3 +98,6 @@ function updateStatus(index, status) {
         }
     }
 }
+
+// デバッグ用のログ
+console.log('audioUtils.js loaded');

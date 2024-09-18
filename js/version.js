@@ -1,5 +1,16 @@
-const APP_VERSION = "1.1.2";
+onsole.log('version.js is executing');
+
+const APP_VERSION = "1.1.3";
 
 export function displayVersion() {
-    document.getElementById('app-version').textContent = APP_VERSION;
+    console.log('Displaying version:', APP_VERSION);
+    const versionElement = document.getElementById('app-version');
+    if (versionElement) {
+        versionElement.textContent = APP_VERSION;
+        console.log('Version displayed successfully');
+    } else {
+        console.error('Element with id "app-version" not found');
+    }
 }
+
+console.log('version.js execution completed');}

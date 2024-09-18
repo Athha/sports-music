@@ -1,3 +1,6 @@
+// アプリケーションのバージョン
+const APP_VERSION = "1.0.1";
+
 let programData = [];
 let sortable;
 
@@ -19,15 +22,36 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProgramTable();
     setupEventListeners();
     initSortable();
+    displayVersion();
+    checkAudioFileStatus();
 });
+
+function displayVersion() {
+    document.getElementById('app-version').textContent = APP_VERSION;
+}
 
 function setupEventListeners() {
     document.getElementById('check-all-files').addEventListener('click', checkAllFiles);
     document.getElementById('clear-storage').addEventListener('click', clearStorage);
     document.getElementById('stop-all-music').addEventListener('click', stopAllMusic);
-    
-    // テーブルへの直接ペーストを処理するイベントリスナーを追加
     document.getElementById('program-body').addEventListener('paste', handleTablePaste);
+}
+
+function initSortable() {
+    const el = document.getElementById('program-body');
+    sortable = Sortable.create(el, {
+        animation: 150,
+        handle: '.drag-handle',
+        onEnd: function (evt) {
+            const newIndex = evt.newIndex;
+            const oldIndex = evt.oldIndex;
+            
+            const [movedItem] = programData.splice(oldIndex, 1);
+            programData.splice(newIndex, 0, movedItem);
+            
+            saveToLocalStorage();
+        }
+    });
 }
 
 function handleTablePaste(e) {
@@ -128,33 +152,6 @@ function renderProgramTable() {
     updateAudioStatus();
 }
 
-function initSortable() {
-    const el = document.getElementById('program-body');
-    sortable = Sortable.create(el, {
-        animation: 150,
-        handle: '.drag-handle',
-        onEnd: function (evt) {
-            const newIndex = evt.newIndex;
-            const oldIndex = evt.oldIndex;
-            
-            const [movedItem] = programData.splice(oldIndex, 1);
-            programData.splice(newIndex, 0, movedItem);
-            
-            saveToLocalStorage();
-        }
-    });
-}
-
-function handleFileSelect(event, index) {
-    const file = event.target.files[0];
-    if (file) {
-        programData[index].audioFile = file;
-        document.getElementById(`file-name-${index}`).textContent = file.name;
-        updateStatus(index, 'local');
-        saveToLocalStorage();
-    }
-}
-
 function updateAudioStatus() {
     programData.forEach((item, index) => {
         if (!item.isSection) {
@@ -173,10 +170,39 @@ function updateStatus(index, status) {
         if (status === 'local') {
             statusElement.textContent = 'ローカル';
             statusElement.className = 'status-local';
-        } else {
+        } else if (status === 'not-found') {
             statusElement.textContent = '未選択';
             statusElement.className = 'status-not-found';
+        } else if (status === 'reselect') {
+            statusElement.textContent = '要再選択';
+            statusElement.className = 'status-reselect';
         }
+    }
+}
+
+function checkAudioFileStatus() {
+    programData.forEach((item, index) => {
+        if (!item.isSection && item.audioFile) {
+            if (!isValidBlobUrl(item.audioFile)) {
+                updateStatus(index, 'reselect');
+                item.audioFile = null; // ファイル情報をクリア
+            }
+        }
+    });
+    saveToLocalStorage();
+}
+
+function isValidBlobUrl(file) {
+    return file && file instanceof File;
+}
+
+function handleFileSelect(event, index) {
+    const file = event.target.files[0];
+    if (file) {
+        programData[index].audioFile = file;
+        document.getElementById(`file-name-${index}`).textContent = file.name;
+        updateStatus(index, 'local');
+        saveToLocalStorage();
     }
 }
 

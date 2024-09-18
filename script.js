@@ -52,12 +52,12 @@ function renderProgramTable() {
         } else {
             row.innerHTML += `
                 <td><input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)"></td>
+                <td><input type="text" value="${item.memo}" onchange="updateProgram(${index}, 'memo', this.value)"></td>
                 <td>
                     <input type="file" accept="audio/*" onchange="handleFileSelect(event, ${index})" style="display: none;" id="file-input-${index}">
                     <button onclick="document.getElementById('file-input-${index}').click()">音楽選択</button>
                     <span id="file-name-${index}">${item.audioFile ? item.audioFile.name : '未選択'}</span>
                 </td>
-                <td><input type="text" value="${item.memo}" onchange="updateProgram(${index}, 'memo', this.value)"></td>
                 <td id="status-${index}"></td>
                 <td>
                     <button onclick="toggleMusic(${index})">▶ 再生</button>

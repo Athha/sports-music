@@ -131,11 +131,33 @@ input[type="text"], input[type="time"], input[type="number"], select {
 }
 
 /* 順序入力フィールドスタイル */
+.order-column {
+    display: flex;
+    align-items: center;
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
+}
+
+.drag-handle {
+    cursor: move;
+    padding: 0 2px;
+    color: #888;
+    font-size: 14px;
+}
+
 .order-input {
     width: 2em;
     text-align: center;
-    padding: 4px 2px;
+    padding: 2px;
     font-size: 0.9em;
+    margin-left: 2px;
+}
+
+/* テーブルセルのパディングを調整 */
+td {
+    padding: 4px;
+    vertical-align: middle;
 }
 
 /* レスポンシブデザイン */

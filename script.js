@@ -49,10 +49,11 @@ function renderProgramTable() {
             `;
         } else {
             row.innerHTML = `
-                <td>
+                <td class="order-column">
                     <span class="drag-handle">≡</span>
                     <input type="text" value="${item.order || ''}" onchange="updateProgram(${index}, 'order', this.value)" placeholder="順" class="order-input" maxlength="2">
                 </td>
+                <td>
                 <td><input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)"></td>
                 <td>
                     <input type="file" accept="audio/*" onchange="handleFileSelect(event, ${index})" style="display: none;" id="file-input-${index}">

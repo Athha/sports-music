@@ -34,26 +34,23 @@ function renderProgramTable() {
     programData.forEach((item, index) => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', index);
+        
+        // 順序列（共通）
+        row.innerHTML = `
+            <td class="order-column">
+                <span class="drag-handle">≡</span>
+                <input type="text" value="${item.order || ''}" onchange="updateProgram(${index}, 'order', this.value)" placeholder="順" class="order-input" maxlength="2">
+            </td>
+        `;
+
         if (item.isSection) {
-            row.innerHTML = `
-                <td colspan="6" style="background-color: #f0f0f0;">
-                    <span class="drag-handle">≡</span>
-                    <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: calc(100% - 40px); background-color: transparent; border: none;" placeholder="セクション名を入力">
-                </td>
-                <td>
-                    <span class="add-program" onclick="addProgram(${index})">＋</span>
-                    <span class="add-section" onclick="addSection(${index + 1})">＊</span>
-                    <span class="delete-program" onclick="deleteProgram(${index})">✖</span>
-                    <span class="drag-handle">≡</span>
+            row.innerHTML += `
+                <td colspan="5" style="background-color: #f0f0f0;">
+                    <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: 100%; background-color: transparent; border: none;" placeholder="セクション名を入力">
                 </td>
             `;
         } else {
-            row.innerHTML = `
-                <td class="order-column">
-                    <span class="drag-handle">≡</span>
-                    <input type="text" value="${item.order || ''}" onchange="updateProgram(${index}, 'order', this.value)" placeholder="順" class="order-input" maxlength="2">
-                </td>
-                <td>
+            row.innerHTML += `
                 <td><input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)"></td>
                 <td>
                     <input type="file" accept="audio/*" onchange="handleFileSelect(event, ${index})" style="display: none;" id="file-input-${index}">
@@ -65,14 +62,19 @@ function renderProgramTable() {
                 <td>
                     <button onclick="toggleMusic(${index})">▶ 再生</button>
                 </td>
-                <td>
-                    <span class="add-program" onclick="addProgram(${index})">＋</span>
-                    <span class="add-section" onclick="addSection(${index + 1})">＊</span>
-                    <span class="delete-program" onclick="deleteProgram(${index})">✖</span>
-                    <span class="drag-handle">≡</span>
-                </td>
             `;
         }
+
+        // 編集列（共通）
+        row.innerHTML += `
+            <td>
+                <span class="add-program" onclick="addProgram(${index})">＋</span>
+                <span class="add-section" onclick="addSection(${index + 1})">＊</span>
+                <span class="delete-program" onclick="deleteProgram(${index})">✖</span>
+                <span class="drag-handle">≡</span>
+            </td>
+        `;
+
         tableBody.appendChild(row);
     });
     

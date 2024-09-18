@@ -109,9 +109,14 @@ button:hover {
 }
 
 /* セクション行スタイル */
-tr[data-id] td[colspan="7"] {
+/* セクション行のスタイル */
+tr[data-id] td[colspan="5"] {
     background-color: #ecf0f1;
+}
+
+tr[data-id] td[colspan="5"] input {
     font-weight: bold;
+    background-color: transparent;
 }
 
 /* 入力フィールドスタイル */

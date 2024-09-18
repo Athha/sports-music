@@ -16,6 +16,8 @@
         <li>プログラムの時間、内容、音源区分、トラック番号、メモを入力してください。</li>
         <li>全ファイルの存在をチェックボタンで、必要な音源が揃っているか確認できます。</li>
         <li>各行の再生/停止ボタンで音楽を制御できます。</li>
+        <li>行をドラッグ＆ドロップして順序を変更できます。</li>
+        <li>「＋」ボタンで新しいプログラム行を追加、「＊」ボタンで新しいセクションを追加、「✖」ボタンで行を削除できます。</li>
     </ol>
 
     <h3>音楽ファイルの準備方法</h3>
@@ -27,6 +29,7 @@
     <button id="select-audio-files">音源ファイルを選択</button>
     <input type="file" id="audio-file-input" multiple accept=".mp3" style="display: none;">
     <button id="check-all-files">全ファイルの存在をチェック</button>
+    <button id="clear-storage">データをクリア</button>
 
     <table id="program-table">
         <thead>
@@ -46,9 +49,6 @@
         </tbody>
     </table>
 
-
-    <p>新しい行を追加するには、「＋」ボタンをクリックしてください。</p>
-
     <div id="audio-path-info">
         <h3>音源ファイルの命名規則：</h3>
         <p>
@@ -61,3 +61,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+

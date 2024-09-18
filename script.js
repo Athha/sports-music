@@ -38,19 +38,20 @@ function renderProgramTable() {
             row.innerHTML = `
                 <td colspan="6" style="background-color: #f0f0f0;">
                     <span class="drag-handle">≡</span>
-                    <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: calc(100% - 20px); background-color: transparent; border: none;" placeholder="セクション名を入力">
+                    <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: calc(100% - 40px); background-color: transparent; border: none;" placeholder="セクション名を入力">
                 </td>
                 <td>
                     <span class="add-program" onclick="addProgram(${index})">＋</span>
                     <span class="add-section" onclick="addSection(${index + 1})">＊</span>
                     <span class="delete-program" onclick="deleteProgram(${index})">✖</span>
+                    <span class="drag-handle">≡</span>
                 </td>
             `;
         } else {
             row.innerHTML = `
                 <td>
                     <span class="drag-handle">≡</span>
-                    <input type="text" value="${item.order || ''}" onchange="updateProgram(${index}, 'order', this.value)" placeholder="順序" style="width: calc(100% - 20px);">
+                    <input type="text" value="${item.order || ''}" onchange="updateProgram(${index}, 'order', this.value)" placeholder="順序" class="order-input">
                 </td>
                 <td><input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)"></td>
                 <td>
@@ -67,6 +68,7 @@ function renderProgramTable() {
                     <span class="add-program" onclick="addProgram(${index})">＋</span>
                     <span class="add-section" onclick="addSection(${index + 1})">＊</span>
                     <span class="delete-program" onclick="deleteProgram(${index})">✖</span>
+                    <span class="drag-handle">≡</span>
                 </td>
             `;
         }

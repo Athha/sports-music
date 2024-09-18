@@ -29,6 +29,7 @@ th, td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
+    vertical-align: middle;
 }
 
 th {
@@ -72,12 +73,14 @@ button:hover {
 }
 
 /* 操作ボタンスタイル */
-.add-program, .add-section, .delete-program {
+.add-program, .add-section, .delete-program, .drag-handle {
     cursor: pointer;
-    padding: 5px;
-    margin: 0 2px;
-    border-radius: 3px;
-    transition: background-color 0.3s;
+    padding: 0 5px;
+    font-size: 18px;
+}
+
+.add-program:hover, .add-section:hover, .delete-program:hover, .drag-handle:hover {
+    color: #333;
 }
 
 .add-program {
@@ -92,10 +95,6 @@ button:hover {
     color: #e74c3c;
 }
 
-.add-program:hover, .add-section:hover, .delete-program:hover {
-    background-color: #f0f0f0;
-}
-
 /* セクション行スタイル */
 tr[data-id] td[colspan="7"] {
     background-color: #ecf0f1;
@@ -104,11 +103,24 @@ tr[data-id] td[colspan="7"] {
 
 /* 入力フィールドスタイル */
 input[type="text"], input[type="time"], input[type="number"], select {
-    width: 100%;
+    width: calc(100% - 10px);
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
+}
+
+/* ドラッグハンドルスタイル */
+.drag-handle {
+    cursor: move;
+    padding: 0 5px;
+    color: #888;
+}
+
+/* 順序入力フィールドスタイル */
+.order-input {
+    width: 40px;
+    text-align: center;
 }
 
 /* レスポンシブデザイン */
@@ -131,22 +143,8 @@ input[type="text"], input[type="time"], input[type="number"], select {
     }
 }
 
-/* アクセシビリティ向上 */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        transition: none !important;
-    }
-}
-
-#status-message {
-    background-color: #ffe6e6;
-    border: 1px solid #ff9999;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-}
-
-@media (max-width: 768px) {
+/* さらに小さい画面用 */
+@media screen and (max-width: 768px) {
     table {
         font-size: 12px;
     }
@@ -157,20 +155,32 @@ input[type="text"], input[type="time"], input[type="number"], select {
 
     button {
         padding: 6px 10px;
-        font-size: 12px;
+        font-size: 11px;
     }
 
     input[type="text"], input[type="time"], input[type="number"], select {
         padding: 6px;
     }
+
+    .add-program, .add-section, .delete-program, .drag-handle {
+        font-size: 16px;
+    }
 }
 
-.drag-handle {
-    cursor: move;
-    padding-right: 5px;
-    color: #888;
+/* アクセシビリティ向上 */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
 }
 
-input[type="text"], input[type="file"] {
-    width: calc(100% - 25px);
+/* フォーカス時のスタイル */
+input:focus, button:focus, select:focus {
+    outline: 2px solid #457b9d;
+    outline-offset: 2px;
+}
+
+/* ホバー時のスタイル */
+input:hover, button:hover, select:hover {
+    border-color: #457b9d;
 }

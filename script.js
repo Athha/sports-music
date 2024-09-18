@@ -120,21 +120,29 @@ function renderProgramTable() {
 }
 
 function updateAudioStatus() {
-    programData.forEach(item => {
+    programData.forEach((item, index) => {
         if (!item.isSection) {
             const key = item.audioSource === '--' ? item.trackNumber : `${item.audioSource}-${item.trackNumber}`;
-            const statusElement = document.getElementById(`status-${item.audioSource}-${item.trackNumber}`);
-            if (statusElement) {
-                if (audioFiles[key]) {
-                    statusElement.textContent = 'ローカル';
-                    statusElement.className = 'status-local';
-                } else {
-                    statusElement.textContent = '未検出';
-                    statusElement.className = 'status-not-found';
-                }
+            if (audioFiles[key]) {
+                updateStatus(index, 'local');
+            } else {
+                updateStatus(index, 'not-found');
             }
         }
     });
+}
+
+function updateStatus(index, status) {
+    const statusElement = document.getElementById(`status-${programData[index].audioSource}-${programData[index].trackNumber}`);
+    if (statusElement) {
+        if (status === 'local') {
+            statusElement.textContent = 'ローカル';
+            statusElement.className = 'status-local';
+        } else {
+            statusElement.textContent = '未検出';
+            statusElement.className = 'status-not-found';
+        }
+    }
 }
 
 function toggleMusic(audioSource, trackNumber) {
@@ -199,13 +207,18 @@ function updateProgram(index, field, value) {
 function checkAllFiles() {
     let missingFiles = [];
     let allFound = true;
-    programData.forEach(item => {
-        if (!item.isSection && item.time && item.program) {
-            const key = item.audioSource === '--' ? item.trackNumber : `${item.audioSource}-${item.trackNumber}`;
+    programData.forEach((item, index) => {
+        if (!item.isSection && item.audioSource !== "--" && item.trackNumber) {
+            const key = `${item.audioSource}-${item.trackNumber}`;
             if (!audioFiles[key]) {
                 missingFiles.push(`${item.program}: ${key}.mp3`);
                 allFound = false;
+                updateStatus(index, 'not-found');
+            } else {
+                updateStatus(index, 'local');
             }
+        } else if (!item.isSection) {
+            updateStatus(index, 'not-found');
         }
     });
 
@@ -214,7 +227,7 @@ function checkAllFiles() {
     } else {
         alert('全ての音源ファイルが見つかりました。');
     }
-    updateAudioStatus();
+    renderProgramTable(); // テーブルを再描画して状態を更新
 }
 
 function clearStorage() {
@@ -263,3 +276,4 @@ function loadFromLocalStorage() {
         }, {});
     }
 }
+

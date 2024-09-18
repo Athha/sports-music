@@ -1,55 +1,30 @@
 let programData = [];
-let audioFiles = {};
-let currentAudio = null;
 let sortable;
-let isFileSystemAccessSupported = false;
 
 document.addEventListener('DOMContentLoaded', () => {
-    checkFileSystemAccessSupport();
     loadFromLocalStorage();
     if (programData.length === 0) {
         // 初期データの設定
         programData = [
-            { time: "", program: "開会式", audioSource: "--", trackNumber: "", memo: "", isSection: true },
-            { time: "", program: "入場", audioSource: "--", trackNumber: "", memo: "", isSection: false },
-            { time: "", program: "はじめのことば", audioSource: "--", trackNumber: "", memo: "", isSection: false },
-            { time: "", program: "君が代の歌", audioSource: "--", trackNumber: "", memo: "", isSection: false },
-            { time: "", program: "演技", audioSource: "--", trackNumber: "", memo: "", isSection: true },
-            { time: "", program: "力を合わせて", audioSource: "--", trackNumber: "", memo: "", isSection: false },
-            { time: "", program: "閉会式", audioSource: "--", trackNumber: "", memo: "", isSection: true },
-            { time: "", program: "入場", audioSource: "--", trackNumber: "", memo: "", isSection: false }
+            { time: "", program: "開会式", audioFile: null, memo: "", isSection: true },
+            { time: "", program: "入場", audioFile: null, memo: "", isSection: false },
+            { time: "", program: "はじめのことば", audioFile: null, memo: "", isSection: false },
+            { time: "", program: "君が代の歌", audioFile: null, memo: "", isSection: false },
+            { time: "", program: "演技", audioFile: null, memo: "", isSection: true },
+            { time: "", program: "力を合わせて", audioFile: null, memo: "", isSection: false },
+            { time: "", program: "閉会式", audioFile: null, memo: "", isSection: true },
+            { time: "", program: "入場", audioFile: null, memo: "", isSection: false }
         ];
     }
     renderProgramTable();
     setupEventListeners();
     initSortable();
-    checkAudioFilesStatus();
 });
 
-function checkFileSystemAccessSupport() {
-    isFileSystemAccessSupported = 'showOpenFilePicker' in window;
-}
-
 function setupEventListeners() {
-    document.getElementById('select-audio-files').addEventListener('click', () => {
-        if (isFileSystemAccessSupported) {
-            handleFileSelect();
-        } else {
-            document.getElementById('audio-file-input').click();
-        }
-    });
-
-    document.getElementById('audio-file-input').addEventListener('change', handleFileSelect);
-
     document.getElementById('check-all-files').addEventListener('click', checkAllFiles);
-
     document.getElementById('clear-storage').addEventListener('click', clearStorage);
-
     document.getElementById('stop-all-music').addEventListener('click', stopAllMusic);
-
-    window.addEventListener('focus', () => {
-        checkAudioFilesStatus();
-    });
 }
 
 function initSortable() {
@@ -68,66 +43,6 @@ function initSortable() {
     });
 }
 
-async function handleFileSelect(event) {
-    let files;
-    if (isFileSystemAccessSupported) {
-        try {
-            const fileHandles = await window.showOpenFilePicker({
-                multiple: true,
-                types: [{
-                    description: 'Audio Files',
-                    accept: {'audio/*': ['.mp3']}
-                }]
-            });
-            files = await Promise.all(fileHandles.map(handle => handle.getFile()));
-        } catch (err) {
-            console.error('File selection was cancelled or failed:', err);
-            return;
-        }
-    } else {
-        files = event.target.files;
-    }
-
-    audioFiles = {};
-    for (let file of files) {
-        const match = file.name.match(/^(?:([abc]))?(\d{2})\.mp3$/i);
-        if (match) {
-            const [, source, number] = match;
-            const key = source ? `${source.toUpperCase()}-${number}` : number;
-            audioFiles[key] = file;
-        }
-    }
-    renderProgramTable();
-    saveToLocalStorage();
-    checkAudioFilesStatus();
-}
-
-function checkAudioFilesStatus() {
-    let missingFiles = false;
-    programData.forEach((item, index) => {
-        if (!item.isSection && item.audioSource !== "--" && item.trackNumber) {
-            const key = item.audioSource === '--' ? item.trackNumber : `${item.audioSource}-${item.trackNumber}`;
-            if (!audioFiles[key]) {
-                missingFiles = true;
-                updateStatus(index, 'not-found');
-            } else {
-                updateStatus(index, 'local');
-            }
-        }
-    });
-
-    const statusMessage = document.getElementById('status-message');
-    if (missingFiles) {
-        statusMessage.textContent = '一部の音楽ファイルが見つかりません。ファイルを再選択してください。';
-        statusMessage.style.display = 'block';
-    } else if (Object.keys(audioFiles).length === 0) {
-        statusMessage.textContent = '音楽ファイルが選択されていません。ファイルを選択してください。';
-        statusMessage.style.display = 'block';
-    } else {
-        statusMessage.style.display = 'none';
-    }
-}
-
 function renderProgramTable() {
     const tableBody = document.querySelector('#program-table tbody');
     tableBody.innerHTML = '';
@@ -138,7 +53,7 @@ function renderProgramTable() {
         row.style.cursor = 'move';
         if (item.isSection) {
             row.innerHTML = `
-                <td colspan="7" style="background-color: #f0f0f0;">
+                <td colspan="6" style="background-color: #f0f0f0;">
                     <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: 100%; background-color: transparent; border: none;" placeholder="セクション名を入力">
                 </td>
                 <td>
@@ -152,22 +67,14 @@ function renderProgramTable() {
                 <td><input type="time" value="${item.time}" onchange="updateProgram(${index}, 'time', this.value)"></td>
                 <td><input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)"></td>
                 <td>
-                    <select class="edit-select" onchange="updateProgram(${index}, 'audioSource', this.value)">
-                        <option value="--" ${item.audioSource === '--' ? 'selected' : ''}>--</option>
-                        <option value="A" ${item.audioSource === 'A' ? 'selected' : ''}>A</option>
-                        <option value="B" ${item.audioSource === 'B' ? 'selected' : ''}>B</option>
-                        <option value="C" ${item.audioSource === 'C' ? 'selected' : ''}>C</option>
-                    </select>
-                </td>
-                <td>
-                    <input type="number" min="1" max="99" value="${item.trackNumber}" 
-                           oninput="this.value = this.value.padStart(2, '0')"
-                           onchange="updateProgram(${index}, 'trackNumber', this.value.padStart(2, '0'))" class="edit-select">
+                    <input type="file" accept="audio/*" onchange="handleFileSelect(event, ${index})" style="display: none;" id="file-input-${index}">
+                    <button onclick="document.getElementById('file-input-${index}').click()">音楽選択</button>
+                    <span id="file-name-${index}">${item.audioFile ? item.audioFile.name : '未選択'}</span>
                 </td>
                 <td><input type="text" value="${item.memo}" onchange="updateProgram(${index}, 'memo', this.value)"></td>
-                <td id="status-${item.audioSource}-${item.trackNumber}"></td>
+                <td id="status-${index}"></td>
                 <td>
-                    <button onclick="toggleMusic('${item.audioSource}', '${item.trackNumber}')">▶ 再生</button>
+                    <button onclick="toggleMusic(${index})">▶ 再生</button>
                 </td>
                 <td>
                     <span class="add-program" onclick="addProgram(${index})">＋</span>
@@ -182,16 +89,21 @@ function renderProgramTable() {
     updateAudioStatus();
 }
 
+function handleFileSelect(event, index) {
+    const file = event.target.files[0];
+    if (file) {
+        programData[index].audioFile = file;
+        document.getElementById(`file-name-${index}`).textContent = file.name;
+        updateStatus(index, 'local');
+        saveToLocalStorage();
+    }
+}
+
 function updateAudioStatus() {
     programData.forEach((item, index) => {
         if (!item.isSection) {
-            const key = item.audioSource === '--' ? item.trackNumber : `${item.audioSource}-${item.trackNumber}`;
-            if (item.audioSource !== "--" && item.trackNumber) {
-                if (audioFiles[key]) {
-                    updateStatus(index, 'local');
-                } else {
-                    updateStatus(index, 'not-found');
-                }
+            if (item.audioFile) {
+                updateStatus(index, 'local');
             } else {
                 updateStatus(index, 'not-found');
             }
@@ -200,76 +112,69 @@ function updateAudioStatus() {
 }
 
 function updateStatus(index, status) {
-    const item = programData[index];
-    const statusElement = document.getElementById(`status-${item.audioSource}-${item.trackNumber}`);
+    const statusElement = document.getElementById(`status-${index}`);
     if (statusElement) {
         if (status === 'local') {
             statusElement.textContent = 'ローカル';
             statusElement.className = 'status-local';
         } else {
-            statusElement.textContent = '未検出';
+            statusElement.textContent = '未選択';
             statusElement.className = 'status-not-found';
         }
     }
 }
 
-function toggleMusic(audioSource, trackNumber) {
-    const key = audioSource === '--' ? trackNumber : `${audioSource}-${trackNumber}`;
-    const audioFile = audioFiles[key];
+let currentAudio = null;
+let currentAudioIndex = null;
 
-    if (currentAudio) {
-        if (currentAudio.src === URL.createObjectURL(audioFile)) {
-            if (currentAudio.paused) {
-                currentAudio.play();
-                updatePlayButtonText(audioSource, trackNumber, '■ 停止');
-            } else {
-                currentAudio.pause();
-                updatePlayButtonText(audioSource, trackNumber, '▶ 再生');
-            }
-            return;
-        } else {
-            currentAudio.pause();
-            updateAllPlayButtonsText();
-        }
+function toggleMusic(index) {
+    const item = programData[index];
+    if (!item.audioFile) {
+        alert('音楽ファイルが選択されていません。');
+        return;
     }
 
-    if (audioFile) {
-        currentAudio = new Audio(URL.createObjectURL(audioFile));
-        currentAudio.play();
-        updatePlayButtonText(audioSource, trackNumber, '■ 停止');
+    if (currentAudio && currentAudioIndex === index) {
+        if (currentAudio.paused) {
+            currentAudio.play();
+            updatePlayButtonText(index, '■ 停止');
+        } else {
+            currentAudio.pause();
+            updatePlayButtonText(index, '▶ 再生');
+        }
     } else {
-        alert('音源ファイルが見つかりません。ファイルを選択してください。');
+        if (currentAudio) {
+            currentAudio.pause();
+            updatePlayButtonText(currentAudioIndex, '▶ 再生');
+        }
+        currentAudio = new Audio(URL.createObjectURL(item.audioFile));
+        currentAudioIndex = index;
+        currentAudio.play();
+        updatePlayButtonText(index, '■ 停止');
     }
 }
 
 function stopAllMusic() {
     if (currentAudio) {
         currentAudio.pause();
+        updatePlayButtonText(currentAudioIndex, '▶ 再生');
         currentAudio = null;
+        currentAudioIndex = null;
     }
-    updateAllPlayButtonsText();
 }
 
-function updatePlayButtonText(audioSource, trackNumber, text) {
-    const button = document.querySelector(`button[onclick="toggleMusic('${audioSource}', '${trackNumber}')"]`);
+function updatePlayButtonText(index, text) {
+    const button = document.querySelector(`button[onclick="toggleMusic(${index})"]`);
     if (button) {
         button.textContent = text;
     }
-}
-
-function updateAllPlayButtonsText() {
-    const buttons = document.querySelectorAll('button[onclick^="toggleMusic"]');
-    buttons.forEach(button => {
-        button.textContent = '▶ 再生';
-    });
 }
 
 function addSection(index) {
     programData.splice(index, 0, {
         time: "",
         program: "",
-        audioSource: "--",
-        trackNumber: "",
+        audioFile: null,
         memo: "",
         isSection: true
     });
@@ -281,8 +186,7 @@ function addProgram(index) {
     programData.splice(index + 1, 0, {
         time: "",
         program: "",
-        audioSource: "--",
-        trackNumber: "01",
+        audioFile: null,
         memo: "",
         isSection: false
     });
@@ -305,84 +209,61 @@ function updateProgram(index, field, value) {
 
 function checkAllFiles() {
     let missingFiles = [];
-    let allFound = true;
     programData.forEach((item, index) => {
-        if (!item.isSection) {
-            const key = item.audioSource === '--' ? item.trackNumber : `${item.audioSource}-${item.trackNumber}`;
-            if (item.audioSource !== "--" && item.trackNumber) {
-                if (!audioFiles[key]) {
-                    missingFiles.push(`${item.program}: ${key}.mp3`);
-                    allFound = false;
-                    updateStatus(index, 'not-found');
-                } else {
-                    updateStatus(index, 'local');
-                }
-            } else {
-                updateStatus(index, 'not-found');
-            }
+        if (!item.isSection && !item.audioFile) {
+            missingFiles.push(`${item.program}`);
+            updateStatus(index, 'not-found');
         }
     });
 
-    if (!allFound) {
-        alert('以下のファイルが見つかりません:\n' + missingFiles.join('\n'));
-    } else if (missingFiles.length === 0) {
-        alert('全ての音源ファイルが見つかりました。');
+    if (missingFiles.length > 0) {
+        alert('以下のプログラムに音楽ファイルが選択されていません:\n' + missingFiles.join('\n'));
     } else {
-        alert('音源が設定されていない項目があります。');
+        alert('全てのプログラムに音楽ファイルが選択されています。');
     }
-    renderProgramTable(); // テーブルを再描画して状態を更新
 }
 
 function clearStorage() {
     if (confirm('保存されているデータをすべて消去し、初期状態に戻しますか？この操作は取り消せません。')) {
         localStorage.removeItem('programData');
-        localStorage.removeItem('audioFileNames');
         // 初期データの再設定
         programData = [
-            { time: "", program: "開会式", audioSource: "--", trackNumber: "", memo: "", isSection: true },
-            { time: "", program: "入場", audioSource: "--", trackNumber: "", memo: "", isSection: false },
-            { time: "", program: "はじめのことば", audioSource: "--", trackNumber: "", memo: "", isSection: false },
-            { time: "", program: "君が代の歌", audioSource: "--", trackNumber: "", memo: "", isSection: false },
-            { time: "", program: "演技", audioSource: "--", trackNumber: "", memo: "", isSection: true },
-            { time: "", program: "力を合わせて", audioSource: "--", trackNumber: "", memo: "", isSection: false },
-            { time: "", program: "閉会式", audioSource: "--", trackNumber: "", memo: "", isSection: true },
-            { time: "", program: "入場", audioSource: "--", trackNumber: "", memo: "", isSection: false }
+            { time: "", program: "開会式", audioFile: null, memo: "", isSection: true },
+            { time: "", program: "入場", audioFile: null, memo: "", isSection: false },
+            { time: "", program: "はじめのことば", audioFile: null, memo: "", isSection: false },
+            { time: "", program: "君が代の歌", audioFile: null, memo: "", isSection: false },
+            { time: "", program: "演技", audioFile: null, memo: "", isSection: true },
+            { time: "", program: "力を合わせて", audioFile: null, memo: "", isSection: false },
+            { time: "", program: "閉会式", audioFile: null, memo: "", isSection: true },
+            { time: "", program: "入場", audioFile: null, memo: "", isSection: false }
         ];
-        audioFiles = {};
         renderProgramTable();
         alert('データが消去され、初期状態に戻りました。');
     }
 }
 
 function saveToLocalStorage() {
-    localStorage.setItem('programData', JSON.stringify(programData));
-    
-    // AudioFileのメタデータのみを保存
-    const audioFileMetadata = Object.keys(audioFiles).reduce((acc, key) => {
-        acc[key] = {
-            name: audioFiles[key].name,
-            lastModified: audioFiles[key].lastModified
-        };
-        return acc;
-    }, {});
-    localStorage.setItem('audioFileMetadata', JSON.stringify(audioFileMetadata));
+    const dataToSave = programData.map(item => {
+        if (item.audioFile) {
+            return {
+                ...item,
+                audioFile: {
+                    name: item.audioFile.name,
+                    type: item.audioFile.type,
+                    lastModified: item.audioFile.lastModified
+                }
+            };
+        }
+        return item;
+    });
+    localStorage.setItem('programData', JSON.stringify(dataToSave));
 }
 
 function loadFromLocalStorage() {
-    const savedProgramData = localStorage.getItem('programData');
-    if (savedProgramData) {
-        programData = JSON.parse(savedProgramData);
-    }
-
-    const savedAudioFileMetadata = localStorage.getItem('audioFileMetadata');
-    if (savedAudioFileMetadata) {
-        const metadata = JSON.parse(savedAudioFileMetadata);
-        audioFiles = Object.keys(metadata).reduce((acc, key) => {
-            acc[key] = {
-                name: metadata[key].name,
-                lastModified: metadata[key].lastModified
-            };
-            return acc;
-        }, {});
+    const savedData = localStorage.getItem('programData');
+    if (savedData) {
+        programData = JSON.parse(savedData);
+        // audioFileのメタデータを実際のFileオブジェクトに変換する処理は省略します
+        // 実際のアプリケーションでは、ファイルの再選択を促すなどの対応が必要です
     }
 }

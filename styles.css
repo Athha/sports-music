@@ -164,3 +164,13 @@ input[type="text"], input[type="time"], input[type="number"], select {
         padding: 6px;
     }
 }
+
+.drag-handle {
+    cursor: move;
+    padding-right: 5px;
+    color: #888;
+}
+
+input[type="text"], input[type="file"] {
+    width: calc(100% - 25px);
+}

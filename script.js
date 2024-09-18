@@ -27,22 +27,6 @@ function setupEventListeners() {
     document.getElementById('stop-all-music').addEventListener('click', stopAllMusic);
 }
 
-function initSortable() {
-    const el = document.getElementById('program-body');
-    sortable = Sortable.create(el, {
-        animation: 150,
-        onEnd: function (evt) {
-            const newIndex = evt.newIndex;
-            const oldIndex = evt.oldIndex;
-            
-            const [movedItem] = programData.splice(oldIndex, 1);
-            programData.splice(newIndex, 0, movedItem);
-            
-            saveToLocalStorage();
-        }
-    });
-}
-
 function renderProgramTable() {
     const tableBody = document.querySelector('#program-table tbody');
     tableBody.innerHTML = '';
@@ -50,11 +34,11 @@ function renderProgramTable() {
     programData.forEach((item, index) => {
         const row = document.createElement('tr');
         row.setAttribute('data-id', index);
-        row.style.cursor = 'move';
         if (item.isSection) {
             row.innerHTML = `
                 <td colspan="6" style="background-color: #f0f0f0;">
-                    <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: 100%; background-color: transparent; border: none;" placeholder="セクション名を入力">
+                    <span class="drag-handle">≡</span>
+                    <input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)" style="width: calc(100% - 20px); background-color: transparent; border: none;" placeholder="セクション名を入力">
                 </td>
                 <td>
                     <span class="add-program" onclick="addProgram(${index})">＋</span>
@@ -64,7 +48,10 @@ function renderProgramTable() {
             `;
         } else {
             row.innerHTML = `
-                <td><input type="time" value="${item.time}" onchange="updateProgram(${index}, 'time', this.value)"></td>
+                <td>
+                    <span class="drag-handle">≡</span>
+                    <input type="text" value="${item.order || ''}" onchange="updateProgram(${index}, 'order', this.value)" placeholder="順序" style="width: calc(100% - 20px);">
+                </td>
                 <td><input type="text" value="${item.program}" onchange="updateProgram(${index}, 'program', this.value)"></td>
                 <td>
                     <input type="file" accept="audio/*" onchange="handleFileSelect(event, ${index})" style="display: none;" id="file-input-${index}">
@@ -87,6 +74,23 @@ function renderProgramTable() {
     });
     
     updateAudioStatus();
+}
+
+function initSortable() {
+    const el = document.getElementById('program-body');
+    sortable = Sortable.create(el, {
+        animation: 150,
+        handle: '.drag-handle',
+        onEnd: function (evt) {
+            const newIndex = evt.newIndex;
+            const oldIndex = evt.oldIndex;
+            
+            const [movedItem] = programData.splice(oldIndex, 1);
+            programData.splice(newIndex, 0, movedItem);
+            
+            saveToLocalStorage();
+        }
+    });
 }
 
 function handleFileSelect(event, index) {

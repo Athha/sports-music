@@ -108,10 +108,15 @@ button:hover {
     color: #e74c3c;
 }
 
-/* セクション行スタイル */
 /* セクション行のスタイル */
 tr[data-id] td[colspan="5"] {
-    background-color: #ecf0f1;
+    background-color: #e6f2ff; /* 薄い青色 */
+    font-weight: bold;
+}
+
+tr[data-id] td[colspan="5"] input {
+    font-weight: bold;
+    background-color: transparent;
 }
 
 tr[data-id] td[colspan="5"] input {

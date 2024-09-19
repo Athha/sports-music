@@ -23,6 +23,9 @@
     <button id="check-all-files">全ファイルの存在をチェック</button>
     <button id="clear-storage">データをクリア</button>
     <button id="stop-all-music">全ての再生を停止</button>
+    <button id="export-data">プログラムデータをエクスポート</button>
+    <input type="file" id="import-data" style="display: none;" accept=".json">
+    <button id="import-button">プログラムデータをインポート</button>
 
     <table id="program-table">
         <thead>
@@ -42,7 +45,7 @@
     </table>
 
     <div id="version-info" style="margin-top: 20px; font-size: 0.8em; color: #666;">
-        バージョンα9: <span id="app-version"></span>
+        バージョンβ1: <span id="app-version"></span>
     </div>
 
     <script type="module" src="/sports-music/js/main.js"></script>

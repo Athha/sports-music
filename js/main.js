@@ -3,6 +3,7 @@ import { setupEventListeners } from '/sports-music/js/eventListeners.js';
 import { initSortable } from '/sports-music/js/sortable.js';
 import { displayVersion } from '/sports-music/js/version.js';
 import { checkAudioFileStatus } from '/sports-music/js/audioUtils.js';
+import '/sports-music/js/exportImport.js';
 
 console.log('main.js is executing');
 

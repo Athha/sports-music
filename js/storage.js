@@ -124,17 +124,26 @@ export async function saveToLocalStorage(programData) {
         return;
     }
 
+    let db;
     try {
-        const db = await initDB();
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        db = await initDB();
+        const transaction = db.transaction([STORE_NAME, FILE_STORE_NAME], 'readwrite');
         const store = transaction.objectStore(STORE_NAME);
+        const fileStore = transaction.objectStore(FILE_STORE_NAME);
 
         // 既存のデータをクリア
-        await new Promise((resolve, reject) => {
-            const clearRequest = store.clear();
-            clearRequest.onsuccess = () => resolve();
-            clearRequest.onerror = () => reject(clearRequest.error);
-        });
+        await Promise.all([
+            new Promise((resolve, reject) => {
+                const clearRequest = store.clear();
+                clearRequest.onsuccess = () => resolve();
+                clearRequest.onerror = () => reject(clearRequest.error);
+            }),
+            new Promise((resolve, reject) => {
+                const clearRequest = fileStore.clear();
+                clearRequest.onsuccess = () => resolve();
+                clearRequest.onerror = () => reject(clearRequest.error);
+            })
+        ]);
 
         // 新しいデータを保存
         const savePromises = programData.map(async (item) => {
@@ -152,7 +161,7 @@ export async function saveToLocalStorage(programData) {
         
         // トランザクションの完了を待機
         await new Promise((resolve, reject) => {
-            const request = store.add({ data: processedData });
+            const request = store.add({ id: 1, data: processedData });
             request.onsuccess = () => resolve();
             request.onerror = () => reject(request.error);
         });
@@ -160,6 +169,10 @@ export async function saveToLocalStorage(programData) {
         console.log('Data saved to IndexedDB');
     } catch (error) {
         console.error('Error saving to IndexedDB:', error);
+    } finally {
+        if (db) {
+            db.close();
+        }
     }
 }
 
@@ -257,7 +270,11 @@ export async function restoreFromImport(importData) {
 
                 // ArrayBufferに変換
                 let arrayBuffer;
-                if (typeof item.audioFile.data === 'string') {
+                if (item.audioFile.data instanceof ArrayBuffer) {
+                    arrayBuffer = item.audioFile.data;
+                } else if (item.audioFile.data instanceof Uint8Array) {
+                    arrayBuffer = item.audioFile.data.buffer;
+                } else if (typeof item.audioFile.data === 'string') {
                     // Base64文字列の場合
                     const binaryString = atob(item.audioFile.data);
                     const bytes = new Uint8Array(binaryString.length);
@@ -265,16 +282,14 @@ export async function restoreFromImport(importData) {
                         bytes[i] = binaryString.charCodeAt(i);
                     }
                     arrayBuffer = bytes.buffer;
-                } else if (item.audioFile.data instanceof ArrayBuffer) {
-                    arrayBuffer = item.audioFile.data;
-                } else if (item.audioFile.data instanceof Uint8Array) {
-                    arrayBuffer = item.audioFile.data.buffer;
+                } else if (item.audioFile.data instanceof Blob) {
+                    arrayBuffer = await item.audioFile.data.arrayBuffer();
                 } else if (typeof item.audioFile.data === 'object' && item.audioFile.data !== null) {
                     // オブジェクトの場合は、dataプロパティを確認
-                    if (item.audioFile.data.data) {
+                    if (item.audioFile.data.data instanceof ArrayBuffer) {
                         arrayBuffer = item.audioFile.data.data;
-                    } else if (item.audioFile.data instanceof Blob) {
-                        arrayBuffer = await item.audioFile.data.arrayBuffer();
+                    } else if (item.audioFile.data.data instanceof Uint8Array) {
+                        arrayBuffer = item.audioFile.data.data.buffer;
                     } else {
                         console.error(`restoreFromImport: 項目${index}のデータ形式が不正`, item.audioFile.data);
                         return item;

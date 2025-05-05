@@ -1,6 +1,6 @@
 console.log('version.js is executing');
 
-export const version = '1.2.4-indexeddb';
+export const version = '1.2.5-indexeddb';
 
 export function displayVersion() {
     console.log('Displaying version:', version);

@@ -149,6 +149,8 @@ export async function saveToLocalStorage(programData) {
         });
 
         const processedData = await Promise.all(savePromises);
+        
+        // トランザクションの完了を待機
         await new Promise((resolve, reject) => {
             const request = store.add({ data: processedData });
             request.onsuccess = () => resolve();
@@ -267,6 +269,14 @@ export async function restoreFromImport(importData) {
                     arrayBuffer = item.audioFile.data;
                 } else if (item.audioFile.data instanceof Uint8Array) {
                     arrayBuffer = item.audioFile.data.buffer;
+                } else if (typeof item.audioFile.data === 'object' && item.audioFile.data !== null) {
+                    // オブジェクトの場合は、dataプロパティを確認
+                    if (item.audioFile.data.data) {
+                        arrayBuffer = item.audioFile.data.data;
+                    } else {
+                        console.error(`restoreFromImport: 項目${index}のデータ形式が不正`, item.audioFile.data);
+                        return item;
+                    }
                 } else {
                     console.error(`restoreFromImport: 項目${index}のデータ形式が不正`, item.audioFile.data);
                     return item;

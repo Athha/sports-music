@@ -64,22 +64,33 @@ export async function exportProgramData() {
 }
 
 export async function importProgramData(file) {
+    console.log('importProgramData: 開始', file);
     try {
         const text = await file.text();
+        console.log('importProgramData: ファイル読み込み完了', {
+            size: text.length,
+            preview: text.substring(0, 100) + '...'
+        });
         const importData = JSON.parse(text);
+        console.log('importProgramData: JSONパース完了', importData);
         const restoredData = await restoreFromImport(importData);
         
         if (!restoredData) {
             throw new Error('Failed to restore data from import');
         }
+        console.log('importProgramData: データ復元完了', restoredData);
 
         // データを更新する前に、既存のデータをクリア
+        console.log('importProgramData: 既存データのクリア開始');
         programData = [];
         await saveToLocalStorage(programData);
+        console.log('importProgramData: 既存データのクリア完了');
 
         // 新しいデータを設定
+        console.log('importProgramData: 新しいデータの設定開始');
         programData = restoredData;
         await saveToLocalStorage(programData);
+        console.log('importProgramData: 新しいデータの設定完了');
         renderProgramTable();
         alert('プログラムデータのインポートが完了しました。');
     } catch (error) {

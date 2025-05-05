@@ -27,6 +27,11 @@ function initDB() {
 
 // ファイルをBlobとして保存
 async function saveFileToIndexedDB(file) {
+    console.log('saveFileToIndexedDB: 開始', {
+        name: file.name,
+        type: file.type,
+        size: file.size
+    });
     const db = await initDB();
     return new Promise((resolve, reject) => {
         const transaction = db.transaction([FILE_STORE_NAME], 'readwrite');
@@ -37,6 +42,10 @@ async function saveFileToIndexedDB(file) {
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
+                console.log('saveFileToIndexedDB: ファイル読み込み完了', {
+                    fileId,
+                    dataSize: e.target.result.byteLength
+                });
                 const request = store.put({
                     id: fileId,
                     name: file.name,
@@ -44,19 +53,30 @@ async function saveFileToIndexedDB(file) {
                     data: e.target.result
                 });
 
-                request.onsuccess = () => resolve(fileId);
-                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    console.log('saveFileToIndexedDB: 保存成功', fileId);
+                    resolve(fileId);
+                };
+                request.onerror = () => {
+                    console.error('saveFileToIndexedDB: 保存エラー', request.error);
+                    reject(request.error);
+                };
             } catch (error) {
+                console.error('saveFileToIndexedDB: 処理エラー', error);
                 reject(error);
             }
         };
-        reader.onerror = () => reject(reader.error);
+        reader.onerror = () => {
+            console.error('saveFileToIndexedDB: ファイル読み込みエラー', reader.error);
+            reject(reader.error);
+        };
         reader.readAsArrayBuffer(file);
     });
 }
 
 // ファイルをBlobとして読み込み
 async function loadFileFromIndexedDB(fileId) {
+    console.log('loadFileFromIndexedDB: 開始', fileId);
     const db = await initDB();
     return new Promise((resolve, reject) => {
         const transaction = db.transaction([FILE_STORE_NAME], 'readonly');
@@ -65,13 +85,29 @@ async function loadFileFromIndexedDB(fileId) {
 
         request.onsuccess = () => {
             if (request.result) {
+                console.log('loadFileFromIndexedDB: データ取得成功', {
+                    fileId,
+                    name: request.result.name,
+                    type: request.result.type,
+                    dataSize: request.result.data.byteLength
+                });
                 const blob = new Blob([request.result.data], { type: request.result.type });
-                resolve(new File([blob], request.result.name, { type: request.result.type }));
+                const file = new File([blob], request.result.name, { type: request.result.type });
+                console.log('loadFileFromIndexedDB: ファイル復元完了', {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
+                resolve(file);
             } else {
+                console.log('loadFileFromIndexedDB: データなし', fileId);
                 resolve(null);
             }
         };
-        request.onerror = () => reject(request.error);
+        request.onerror = () => {
+            console.error('loadFileFromIndexedDB: エラー', request.error);
+            reject(request.error);
+        };
     });
 }
 
@@ -195,24 +231,38 @@ export async function prepareForExport(programData) {
 
 // インポートしたデータを復元
 export async function restoreFromImport(importData) {
+    console.log('restoreFromImport: 開始', importData);
     if (!importData || !Array.isArray(importData)) {
         console.error('Invalid import data provided to restoreFromImport');
         return null;
     }
 
     try {
-        const restoredData = await Promise.all(importData.map(async (item) => {
+        const restoredData = await Promise.all(importData.map(async (item, index) => {
+            console.log(`restoreFromImport: 項目${index}の処理開始`, item);
             if (item && item.audioFile && item.audioFile.data) {
+                console.log(`restoreFromImport: 項目${index}のファイルデータ`, {
+                    name: item.audioFile.name,
+                    type: item.audioFile.type,
+                    dataSize: item.audioFile.data.byteLength
+                });
                 const blob = new Blob([item.audioFile.data], { type: item.audioFile.type });
                 const file = new File([blob], item.audioFile.name, { type: item.audioFile.type });
+                console.log(`restoreFromImport: 項目${index}のファイル復元完了`, {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
                 return {
                     ...item,
                     audioFile: file
                 };
             }
+            console.log(`restoreFromImport: 項目${index}にファイルデータなし`);
             return item;
         }));
 
+        console.log('restoreFromImport: 全データの復元完了', restoredData);
         return restoredData;
     } catch (error) {
         console.error('Error restoring data from import:', error);

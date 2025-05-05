@@ -227,11 +227,18 @@ export async function prepareForExport(programData) {
             if (item && item.audioFile && item.audioFile instanceof File) {
                 const fileData = await new Promise((resolve) => {
                     const reader = new FileReader();
-                    reader.onload = (e) => resolve({
-                        name: item.audioFile.name,
-                        type: item.audioFile.type,
-                        data: e.target.result
-                    });
+                    reader.onload = (e) => {
+                        const arrayBuffer = e.target.result;
+                        const base64 = btoa(
+                            new Uint8Array(arrayBuffer)
+                                .reduce((data, byte) => data + String.fromCharCode(byte), '')
+                        );
+                        resolve({
+                            name: item.audioFile.name,
+                            type: item.audioFile.type,
+                            data: base64
+                        });
+                    };
                     reader.readAsArrayBuffer(item.audioFile);
                 });
 
@@ -265,39 +272,16 @@ export async function restoreFromImport(importData) {
                 console.log(`restoreFromImport: 項目${index}のファイルデータ`, {
                     name: item.audioFile.name,
                     type: item.audioFile.type,
-                    dataSize: item.audioFile.data.byteLength || item.audioFile.data.length
+                    dataSize: item.audioFile.data.length
                 });
 
-                // ArrayBufferに変換
-                let arrayBuffer;
-                if (item.audioFile.data instanceof ArrayBuffer) {
-                    arrayBuffer = item.audioFile.data;
-                } else if (item.audioFile.data instanceof Uint8Array) {
-                    arrayBuffer = item.audioFile.data.buffer;
-                } else if (typeof item.audioFile.data === 'string') {
-                    // Base64文字列の場合
-                    const binaryString = atob(item.audioFile.data);
-                    const bytes = new Uint8Array(binaryString.length);
-                    for (let i = 0; i < binaryString.length; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                    }
-                    arrayBuffer = bytes.buffer;
-                } else if (item.audioFile.data instanceof Blob) {
-                    arrayBuffer = await item.audioFile.data.arrayBuffer();
-                } else if (typeof item.audioFile.data === 'object' && item.audioFile.data !== null) {
-                    // オブジェクトの場合は、dataプロパティを確認
-                    if (item.audioFile.data.data instanceof ArrayBuffer) {
-                        arrayBuffer = item.audioFile.data.data;
-                    } else if (item.audioFile.data.data instanceof Uint8Array) {
-                        arrayBuffer = item.audioFile.data.data.buffer;
-                    } else {
-                        console.error(`restoreFromImport: 項目${index}のデータ形式が不正`, item.audioFile.data);
-                        return item;
-                    }
-                } else {
-                    console.error(`restoreFromImport: 項目${index}のデータ形式が不正`, item.audioFile.data);
-                    return item;
+                // Base64データをArrayBufferに変換
+                const binaryString = atob(item.audioFile.data);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
                 }
+                const arrayBuffer = bytes.buffer;
 
                 if (!arrayBuffer || arrayBuffer.byteLength === 0) {
                     console.error(`restoreFromImport: 項目${index}のデータが空`, arrayBuffer);

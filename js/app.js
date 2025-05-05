@@ -73,7 +73,14 @@ export async function importProgramData(file) {
             throw new Error('Failed to restore data from import');
         }
 
-        updateProgramData(restoredData);
+        // データを更新する前に、既存のデータをクリア
+        programData = [];
+        await saveToLocalStorage(programData);
+
+        // 新しいデータを設定
+        programData = restoredData;
+        await saveToLocalStorage(programData);
+        renderProgramTable();
         alert('プログラムデータのインポートが完了しました。');
     } catch (error) {
         console.error('Error importing program data:', error);

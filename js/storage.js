@@ -33,15 +33,25 @@ async function saveFileToIndexedDB(file) {
         const store = transaction.objectStore(FILE_STORE_NAME);
         const fileId = Date.now().toString();
         
-        const request = store.put({
-            id: fileId,
-            name: file.name,
-            type: file.type,
-            data: file
-        });
+        // ファイルをBlobとして保存
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const request = store.put({
+                    id: fileId,
+                    name: file.name,
+                    type: file.type,
+                    data: e.target.result
+                });
 
-        request.onsuccess = () => resolve(fileId);
-        request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(fileId);
+                request.onerror = () => reject(request.error);
+            } catch (error) {
+                reject(error);
+            }
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsArrayBuffer(file);
     });
 }
 
@@ -55,7 +65,8 @@ async function loadFileFromIndexedDB(fileId) {
 
         request.onsuccess = () => {
             if (request.result) {
-                resolve(new File([request.result.data], request.result.name, { type: request.result.type }));
+                const blob = new Blob([request.result.data], { type: request.result.type });
+                resolve(new File([blob], request.result.name, { type: request.result.type }));
             } else {
                 resolve(null);
             }
@@ -84,16 +95,20 @@ export async function saveToLocalStorage(programData) {
         });
 
         // 新しいデータを保存
-        for (const item of programData) {
+        const savePromises = programData.map(async (item) => {
             if (item && item.audioFile && item.audioFile instanceof File) {
                 const fileId = await saveFileToIndexedDB(item.audioFile);
-                item.audioFileId = fileId;
-                delete item.audioFile;
+                return {
+                    ...item,
+                    audioFileId: fileId
+                };
             }
-        }
+            return item;
+        });
 
+        const processedData = await Promise.all(savePromises);
         await new Promise((resolve, reject) => {
-            const request = store.add({ data: programData });
+            const request = store.add({ data: processedData });
             request.onsuccess = () => resolve();
             request.onerror = () => reject(request.error);
         });
@@ -121,14 +136,20 @@ export async function loadFromLocalStorage() {
             const programData = result[0].data;
             
             // ファイルデータを復元
-            for (const item of programData) {
+            const processedData = await Promise.all(programData.map(async (item) => {
                 if (item.audioFileId) {
-                    item.audioFile = await loadFileFromIndexedDB(item.audioFileId);
-                    delete item.audioFileId;
+                    const file = await loadFileFromIndexedDB(item.audioFileId);
+                    if (file) {
+                        return {
+                            ...item,
+                            audioFile: file
+                        };
+                    }
                 }
-            }
+                return item;
+            }));
 
-            return programData;
+            return processedData;
         }
         return [];
     } catch (error) {

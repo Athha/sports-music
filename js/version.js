@@ -1,12 +1,12 @@
 console.log('version.js is executing');
 
-const APP_VERSION = "1.2.3-indexeddb";
+export const version = '1.2.4-indexeddb';
 
 export function displayVersion() {
-    console.log('Displaying version:', APP_VERSION);
+    console.log('Displaying version:', version);
     const versionElement = document.getElementById('app-version');
     if (versionElement) {
-        versionElement.textContent = APP_VERSION;
+        versionElement.textContent = version;
         console.log('Version displayed successfully');
     } else {
         console.error('Element with id "app-version" not found');

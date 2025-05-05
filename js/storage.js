@@ -273,12 +273,19 @@ export async function restoreFromImport(importData) {
                     // オブジェクトの場合は、dataプロパティを確認
                     if (item.audioFile.data.data) {
                         arrayBuffer = item.audioFile.data.data;
+                    } else if (item.audioFile.data instanceof Blob) {
+                        arrayBuffer = await item.audioFile.data.arrayBuffer();
                     } else {
                         console.error(`restoreFromImport: 項目${index}のデータ形式が不正`, item.audioFile.data);
                         return item;
                     }
                 } else {
                     console.error(`restoreFromImport: 項目${index}のデータ形式が不正`, item.audioFile.data);
+                    return item;
+                }
+
+                if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+                    console.error(`restoreFromImport: 項目${index}のデータが空`, arrayBuffer);
                     return item;
                 }
 

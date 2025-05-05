@@ -1,6 +1,6 @@
 console.log('version.js is executing');
 
-const APP_VERSION = "1.2.1";
+const APP_VERSION = "1.2.2-indexeddb";
 
 export function displayVersion() {
     console.log('Displaying version:', APP_VERSION);

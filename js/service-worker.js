@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sports-day-cache-v1.1.2';
+const CACHE_NAME = 'sports-day-cache-v1.2.2-indexeddb';
 const urlsToCache = [
   '/',
   '/index.html',

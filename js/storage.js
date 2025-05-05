@@ -158,4 +158,66 @@ export async function loadFromLocalStorage() {
     }
 }
 
+// プログラムデータをエクスポート用に変換
+export async function prepareForExport(programData) {
+    if (!programData || !Array.isArray(programData)) {
+        console.error('Invalid program data provided to prepareForExport');
+        return null;
+    }
+
+    try {
+        const exportData = await Promise.all(programData.map(async (item) => {
+            if (item && item.audioFile && item.audioFile instanceof File) {
+                const fileData = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve({
+                        name: item.audioFile.name,
+                        type: item.audioFile.type,
+                        data: e.target.result
+                    });
+                    reader.readAsArrayBuffer(item.audioFile);
+                });
+
+                return {
+                    ...item,
+                    audioFile: fileData
+                };
+            }
+            return item;
+        }));
+
+        return exportData;
+    } catch (error) {
+        console.error('Error preparing data for export:', error);
+        return null;
+    }
+}
+
+// インポートしたデータを復元
+export async function restoreFromImport(importData) {
+    if (!importData || !Array.isArray(importData)) {
+        console.error('Invalid import data provided to restoreFromImport');
+        return null;
+    }
+
+    try {
+        const restoredData = await Promise.all(importData.map(async (item) => {
+            if (item && item.audioFile && item.audioFile.data) {
+                const blob = new Blob([item.audioFile.data], { type: item.audioFile.type });
+                const file = new File([blob], item.audioFile.name, { type: item.audioFile.type });
+                return {
+                    ...item,
+                    audioFile: file
+                };
+            }
+            return item;
+        }));
+
+        return restoredData;
+    } catch (error) {
+        console.error('Error restoring data from import:', error);
+        return null;
+    }
+}
+
 console.log('storage.js execution completed');

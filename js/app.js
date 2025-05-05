@@ -1,4 +1,4 @@
-import { loadFromLocalStorage, saveToLocalStorage } from '/sports-music/js/storage.js';
+import { loadFromLocalStorage, saveToLocalStorage, prepareForExport, restoreFromImport } from '/sports-music/js/storage.js';
 import { renderProgramTable } from '/sports-music/js/render.js';
 
 console.log('app.js is executing');
@@ -38,6 +38,46 @@ export function updateProgramData(newData) {
         renderProgramTable();
     } else {
         console.error('Invalid data provided to updateProgramData:', newData);
+    }
+}
+
+export async function exportProgramData() {
+    try {
+        const exportData = await prepareForExport(programData);
+        if (!exportData) {
+            throw new Error('Failed to prepare data for export');
+        }
+
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `sports-day-program-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error exporting program data:', error);
+        alert('プログラムデータのエクスポートに失敗しました。');
+    }
+}
+
+export async function importProgramData(file) {
+    try {
+        const text = await file.text();
+        const importData = JSON.parse(text);
+        const restoredData = await restoreFromImport(importData);
+        
+        if (!restoredData) {
+            throw new Error('Failed to restore data from import');
+        }
+
+        updateProgramData(restoredData);
+        alert('プログラムデータのインポートが完了しました。');
+    } catch (error) {
+        console.error('Error importing program data:', error);
+        alert('プログラムデータのインポートに失敗しました。');
     }
 }
 

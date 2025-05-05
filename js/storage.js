@@ -47,21 +47,26 @@ async function saveFileToIndexedDB(file) {
                     dataSize: e.target.result.byteLength
                 });
 
-                const request = store.put({
-                    id: fileId,
-                    name: file.name,
-                    type: file.type,
-                    data: e.target.result
+                // トランザクションの完了を待機
+                await new Promise((resolve, reject) => {
+                    const request = store.put({
+                        id: fileId,
+                        name: file.name,
+                        type: file.type,
+                        data: e.target.result
+                    });
+
+                    request.onsuccess = () => {
+                        console.log('saveFileToIndexedDB: 保存成功', fileId);
+                        resolve();
+                    };
+                    request.onerror = () => {
+                        console.error('saveFileToIndexedDB: 保存エラー', request.error);
+                        reject(request.error);
+                    };
                 });
 
-                request.onsuccess = () => {
-                    console.log('saveFileToIndexedDB: 保存成功', fileId);
-                    resolve(fileId);
-                };
-                request.onerror = () => {
-                    console.error('saveFileToIndexedDB: 保存エラー', request.error);
-                    reject(request.error);
-                };
+                resolve(fileId);
             } catch (error) {
                 console.error('saveFileToIndexedDB: 処理エラー', error);
                 reject(error);
@@ -258,8 +263,13 @@ export async function restoreFromImport(importData) {
                         bytes[i] = binaryString.charCodeAt(i);
                     }
                     arrayBuffer = bytes.buffer;
-                } else {
+                } else if (item.audioFile.data instanceof ArrayBuffer) {
                     arrayBuffer = item.audioFile.data;
+                } else if (item.audioFile.data instanceof Uint8Array) {
+                    arrayBuffer = item.audioFile.data.buffer;
+                } else {
+                    console.error(`restoreFromImport: 項目${index}のデータ形式が不正`, item.audioFile.data);
+                    return item;
                 }
 
                 const blob = new Blob([arrayBuffer], { type: item.audioFile.type });

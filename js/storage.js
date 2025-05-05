@@ -32,20 +32,21 @@ async function saveFileToIndexedDB(file) {
         type: file.type,
         size: file.size
     });
-    const db = await initDB();
+
     return new Promise((resolve, reject) => {
-        const transaction = db.transaction([FILE_STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(FILE_STORE_NAME);
-        const fileId = Date.now().toString();
-        
-        // ファイルをBlobとして保存
         const reader = new FileReader();
         reader.onload = async (e) => {
             try {
+                const db = await initDB();
+                const transaction = db.transaction([FILE_STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(FILE_STORE_NAME);
+                const fileId = Date.now().toString();
+
                 console.log('saveFileToIndexedDB: ファイル読み込み完了', {
                     fileId,
                     dataSize: e.target.result.byteLength
                 });
+
                 const request = store.put({
                     id: fileId,
                     name: file.name,
@@ -244,9 +245,24 @@ export async function restoreFromImport(importData) {
                 console.log(`restoreFromImport: 項目${index}のファイルデータ`, {
                     name: item.audioFile.name,
                     type: item.audioFile.type,
-                    dataSize: item.audioFile.data.byteLength
+                    dataSize: item.audioFile.data.byteLength || item.audioFile.data.length
                 });
-                const blob = new Blob([item.audioFile.data], { type: item.audioFile.type });
+
+                // ArrayBufferに変換
+                let arrayBuffer;
+                if (typeof item.audioFile.data === 'string') {
+                    // Base64文字列の場合
+                    const binaryString = atob(item.audioFile.data);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    arrayBuffer = bytes.buffer;
+                } else {
+                    arrayBuffer = item.audioFile.data;
+                }
+
+                const blob = new Blob([arrayBuffer], { type: item.audioFile.type });
                 const file = new File([blob], item.audioFile.name, { type: item.audioFile.type });
                 console.log(`restoreFromImport: 項目${index}のファイル復元完了`, {
                     name: file.name,
